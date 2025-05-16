@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1 Registrar nuevo paciente
+
+  form(action="/pacientes" method="POST")
+    div
+      label Nombre:
+      input(type="text" name="nombre" required)
+    div
+      label DNI:
+      input(type="text" name="dni" required)
+    div
+      label Fecha de Nacimiento:
+      input(type="date" name="fechaNacimiento" required)
+    div
+      label Sexo:
+      select(name="sexo" required)
+        option(value="Masculino") Masculino
+        option(value="Femenino") Femenino
+    div
+      label Teléfono:
+      input(type="text" name="telefono")
+    div
+      label Dirección:
+      input(type="text" name="direccion")
+    div
+      label Obra Social:
+      input(type="text" name="obraSocial")
+    div
+      button(type="submit") Registrar

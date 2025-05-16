@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  h1 Evaluación Inicial - #{paciente.nombre}
+
+  form(action=`/enfermeria/registrar/${paciente.id}` method="POST")
+    div
+      label Enfermedades Previas:
+      textarea(name="enfermedadesPrevias")
+    div
+      label Cirugías:
+      textarea(name="cirugias")
+    div
+      label Alergias:
+      textarea(name="alergias")
+    div
+      label Medicación Actual:
+      textarea(name="medicacionActual")
+    div
+      label Antecedentes Familiares:
+      textarea(name="antecedentesFamiliares")
+    div
+      label Motivo de Internación:
+      textarea(name="motivoInternacion")
+    div
+      label Síntomas:
+      textarea(name="sintomas")
+    div
+      label Presión arterial:
+      input(type="text" name="presion")
+    div
+      label Frecuencia cardíaca:
+      input(type="text" name="frecuenciaCardiaca")
+    div
+      label Frecuencia respiratoria:
+      input(type="text" name="frecuenciaRespiratoria")
+    div
+      label Temperatura:
+      input(type="text" name="temperatura")
+    div
+      label Plan de Cuidados:
+      textarea(name="planCuidados")
+    button(type="submit") Registrar Evaluación

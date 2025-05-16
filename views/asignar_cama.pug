@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1 Asignar cama al paciente
+  h2= paciente.nombre
+
+  if camas.length
+    form(action=`/internacion/asignar/${paciente.id}` method="POST")
+      div
+        label Cama disponible:
+        select(name="camaId" required)
+          each cama in camas
+            option(value=cama.id)= `${cama.numero} - Habitación ${cama.Habitacion.numero} (${cama.Habitacion.Ala.nombre})`
+      button(type="submit") Asignar cama
+  else
+    p No hay camas disponibles compatibles.

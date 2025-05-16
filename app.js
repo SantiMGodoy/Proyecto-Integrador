@@ -18,3 +18,12 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+const pacientesRoutes = require('./routes/pacientes');
+app.use('/pacientes', pacientesRoutes);
+
+const internacionRoutes = require('./routes/internacion');
+app.use('/internacion', internacionRoutes);
+
+const enfermeriaRoutes = require('./routes/enfermeria');
+app.use('/enfermeria', enfermeriaRoutes);
