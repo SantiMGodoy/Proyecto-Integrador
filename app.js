@@ -27,3 +27,9 @@ app.use('/internacion', internacionRoutes);
 
 const enfermeriaRoutes = require('./routes/enfermeria');
 app.use('/enfermeria', enfermeriaRoutes);
+
+const medicaRoutes = require('./routes/medica');
+app.use('/medica', medicaRoutes);
+
+const resumenRoutes = require('./routes/resumen');
+app.use('/resumen', resumenRoutes);

@@ -1,10 +1,20 @@
-doctype html
-html
-  head
-    title HIS - Sistema de Admisión
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    link(rel="stylesheet", href="/styles.css")
-  body
-    h1= titulo
-    p Bienvenido al sistema de admisión hospitalaria.
+extends layout
+
+block content
+  h1 Sistema de Admisión Hospitalaria
+
+  p Bienvenido al módulo de internación HIS.
+
+  ul
+    li
+      a(href="/pacientes/nuevo") ➕ Registrar nuevo paciente
+    li
+      a(href="/internacion/asignar/1") 🛏️ Asignar cama (reemplazar ID en URL)
+    li
+      a(href="/enfermeria/registrar/1") 👩‍⚕️ Evaluación de enfermería (reemplazar ID)
+    li
+      a(href="/medica/registrar/1") 👨‍⚕️ Evaluación médica (reemplazar ID)
+    li
+      a(href="/resumen/1") 📋 Ver resumen admisión (reemplazar ID)
+      li
+  a(href="/pacientes/internados") 🧾 Listado de pacientes internados

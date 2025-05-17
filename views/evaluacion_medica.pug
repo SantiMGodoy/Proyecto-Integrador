@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  h1 Evaluación Médica - #{paciente.nombre}
+
+  form(action=`/medica/registrar/${paciente.id}` method="POST")
+    div
+      label Diagnóstico:
+      textarea(name="diagnostico" required)
+    div
+      label Tratamientos indicados:
+      textarea(name="tratamientos")
+    div
+      label Medicación:
+      textarea(name="medicacion")
+    div
+      label Estudios solicitados:
+      textarea(name="estudiosSolicitados")
+    div
+      label Observaciones generales:
+      textarea(name="observaciones")
+    button(type="submit") Registrar Evaluación Médica

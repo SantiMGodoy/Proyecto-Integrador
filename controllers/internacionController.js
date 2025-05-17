@@ -1,4 +1,4 @@
-const { Paciente, Cama, Habitacion, Ala } = require('../models');
+const { Paciente, Cama, Habitacion, Ala, Internacion } = require('../models');
 
 const mostrarFormularioAsignacion = async (req, res) => {
   try {
@@ -24,7 +24,6 @@ const mostrarFormularioAsignacion = async (req, res) => {
       if (camasOcupadas.length === 0) {
         camasFiltradas.push(cama); // habitación vacía
       } else {
-        // verificar sexo del ocupante
         if (camasOcupadas[0].sexoOcupante === paciente.sexo) {
           camasFiltradas.push(cama);
         }
@@ -53,7 +52,7 @@ const asignarCama = async (req, res) => {
       sexoOcupante: paciente.sexo
     });
 
-    await require('../models').Internacion.create({
+    await Internacion.create({
       PacienteId: paciente.id,
       CamaId: cama.id,
       fechaIngreso: new Date(),
@@ -67,7 +66,33 @@ const asignarCama = async (req, res) => {
   }
 };
 
+const cancelarAdmision = async (req, res) => {
+  try {
+    const internacion = await Internacion.findOne({
+      where: { PacienteId: req.params.pacienteId, estado: 'activa' },
+      include: Cama
+    });
+
+    if (!internacion) {
+      return res.status(404).send('No se encontró una internación activa para cancelar');
+    }
+
+    await internacion.Cama.update({
+      estado: 'libre',
+      sexoOcupante: null
+    });
+
+    await internacion.update({ estado: 'cancelada' });
+
+    res.redirect(`/resumen/${req.params.pacienteId}`); // También podés usar res.send() si preferís
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al cancelar internación');
+  }
+};
+
 module.exports = {
   mostrarFormularioAsignacion,
   asignarCama,
+  cancelarAdmision
 };

@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  h1 Pacientes Internados
+
+  if internaciones.length
+    table(border="1" cellpadding="5")
+      thead
+        tr
+          th Nombre
+          th DNI
+          th Fecha de ingreso
+          th Habitación
+          th Cama
+          th Ala
+          th Acciones
+      tbody
+        each internacion in internaciones
+          tr
+            td= internacion.Paciente.nombre
+            td= internacion.Paciente.dni
+            td= internacion.fechaIngreso.toDateString()
+            td= internacion.Cama.Habitacion.numero
+            td= internacion.Cama.numero
+            td= internacion.Cama.Habitacion.Ala.nombre
+            td
+              a(href=`/resumen/${internacion.Paciente.id}`) 📋 Ver resumen
+  else
+    p No hay pacientes internados en este momento.
