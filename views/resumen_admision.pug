@@ -19,6 +19,12 @@ block content
     p Habitación: #{internacion.Cama.Habitacion.numero}
     p Ala: #{internacion.Cama.Habitacion.Ala.nombre}
 
+    if internacion.fechaAlta
+      p Fecha de alta: #{internacion.fechaAlta.toDateString()}
+    else
+      form(action=`/internacion/alta/${paciente.id}` method="POST" onsubmit="return confirm('¿Confirmar alta hospitalaria del paciente?');")
+        button(type="submit" style="color:green") ✅ Dar de alta al paciente
+
     form(action=`/internacion/cancelar/${paciente.id}` method="POST" onsubmit="return confirm('¿Cancelar esta internación?');")
       button(type="submit" style="color:red") ❌ Cancelar internación
   else

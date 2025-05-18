@@ -5,13 +5,13 @@ const mostrarFormularioAsignacion = async (req, res) => {
     const paciente = await Paciente.findByPk(req.params.pacienteId);
     if (!paciente) return res.status(404).send('Paciente no encontrado');
 
-    // Buscar camas libres
+    // Buscamos camas libres
     const camasDisponibles = await Cama.findAll({
       where: { estado: 'libre' },
       include: [{ model: Habitacion, include: [Ala] }]
     });
 
-    // Filtrar por compatibilidad de sexo si hay otra cama ocupada en la misma habitación
+    // Filtramos por compatibilidad de sexo si hay otra cama ocupada en la misma habitacion
     const camasFiltradas = [];
 
     for (let cama of camasDisponibles) {
@@ -22,7 +22,7 @@ const mostrarFormularioAsignacion = async (req, res) => {
       const camasOcupadas = habitacion.Camas.filter(c => c.estado === 'ocupada');
 
       if (camasOcupadas.length === 0) {
-        camasFiltradas.push(cama); // habitación vacía
+        camasFiltradas.push(cama); // habitacion libre
       } else {
         if (camasOcupadas[0].sexoOcupante === paciente.sexo) {
           camasFiltradas.push(cama);
@@ -84,15 +84,47 @@ const cancelarAdmision = async (req, res) => {
 
     await internacion.update({ estado: 'cancelada' });
 
-    res.redirect(`/resumen/${req.params.pacienteId}`); // También podés usar res.send() si preferís
+    res.redirect(`/resumen/${req.params.pacienteId}`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al cancelar internación');
   }
 };
 
+const darDeAlta = async (req, res) => {
+  try {
+    const internacion = await Internacion.findOne({
+      where: { PacienteId: req.params.pacienteId, estado: 'activa' },
+      include: Cama
+    });
+
+    if (!internacion) {
+      return res.status(404).send('No se encontró internación activa para alta');
+    }
+
+    // Liberar cama
+    await internacion.Cama.update({
+      estado: 'libre',
+      sexoOcupante: null
+    });
+
+    // Finalizar internación
+    await internacion.update({
+      estado: 'finalizada',
+      fechaAlta: new Date()
+    });
+
+    res.redirect(`/resumen/${req.params.pacienteId}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al dar de alta al paciente');
+  }
+};
+
+
 module.exports = {
   mostrarFormularioAsignacion,
   asignarCama,
-  cancelarAdmision
+  cancelarAdmision,
+  darDeAlta
 };
