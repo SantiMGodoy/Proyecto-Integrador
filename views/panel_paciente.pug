@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  h2.text-center.mb-4 Opciones para el paciente: #{paciente.nombre}
+
+  .row.text-center
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 🛏️ Asignar cama
+          a.btn.btn-primary(href=`/internacion/asignar/${paciente.id}`) Ir
+
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 👩‍⚕️ Evaluación de enfermería
+          a.btn.btn-success(href=`/enfermeria/registrar/${paciente.id}`) Ir
+
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 👨‍⚕️ Evaluación médica
+          a.btn.btn-info(href=`/medica/registrar/${paciente.id}`) Ir
+
+  .row.text-center.mt-4
+    .col-md-6.offset-md-3
+      .card.shadow-sm
+        .card-body
+          h5.card-title 📋 Ver resumen del paciente
+          a.btn.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen

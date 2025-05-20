@@ -1,20 +1,61 @@
 extends layout
 
 block content
-  h1 Sistema de Admisión Hospitalaria
+  .text-center
+    h1 Sistema de Admisión Hospitalaria
+    p.lead Bienvenido al módulo de internación HIS.
 
-  p Bienvenido al módulo de internación HIS.
+    // Contador de internados activos
+    if totalInternados > 0
+      .alert.alert-info.mt-3
+        | 👥 Hay actualmente 
+        b #{totalInternados} 
+        | pacientes internados activos.
+    else
+      .alert.alert-warning.mt-3
+        | No hay pacientes internados en este momento.
 
-  ul
-    li
-      a(href="/pacientes/nuevo") ➕ Registrar nuevo paciente
-    li
-      a(href="/internacion/asignar/1") 🛏️ Asignar cama (reemplazar ID en URL)
-    li
-      a(href="/enfermeria/registrar/1") 👩‍⚕️ Evaluación de enfermería (reemplazar ID)
-    li
-      a(href="/medica/registrar/1") 👨‍⚕️ Evaluación médica (reemplazar ID)
-    li
-      a(href="/resumen/1") 📋 Ver resumen admisión (reemplazar ID)
-      li
-  a(href="/pacientes/internados") 🧾 Listado de pacientes internados
+  // Guía rápida de uso
+  .card.mt-4.mb-5
+    .card-body
+      h5.card-title.text-primary ℹ️ ¿Cómo usar el sistema?
+      ol
+        li Registrar un nuevo paciente desde el botón correspondiente.
+        li Asignarle una cama disponible (se asigna por compatibilidad).
+        li Completar la evaluación de enfermería y médica.
+        li Consultar el resumen del paciente.
+        li Dar de alta al paciente cuando corresponda.
+
+  .row.text-center
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title ➕ Registrar Paciente
+          p.card-text Alta de un nuevo paciente al sistema.
+          a.btn.btn-primary.btn-lg(href="/pacientes/nuevo") Ir al formulario
+
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 🧾 Pacientes Internados
+          p.card-text Ver todos los pacientes con internación activa.
+          a.btn.btn-success.btn-lg(href="/pacientes/internados") Ver lista
+
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 📋 Resumen de Admisión
+          p.card-text Ver resumen completo de un paciente por ID.
+          form(action="/resumen" method="GET")
+            input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
+            button.btn.btn-outline-primary(type="submit") Ver resumen
+
+  .row.text-center
+    .col-md-6.offset-md-3
+      .card.shadow-sm.mt-4
+        .card-body
+          h5.card-title 🔍 Gestión rápida por paciente
+          p.card-text Ingresá el ID de un paciente para acceder a todas las opciones disponibles.
+          form(action="/pacientes/opciones" method="GET")
+            input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
+            button.btn.btn-outline-dark(type="submit") Ver opciones
