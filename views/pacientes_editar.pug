@@ -1,0 +1,44 @@
+extends layout
+
+block content
+  h2.text-center.mb-4 Editar datos del paciente
+
+  form(action=`/pacientes/editar/${paciente.id}` method="POST")
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="nombre") Nombre
+        input.form-control(type="text" name="nombre" value=paciente.nombre required)
+
+      .col-md-6
+        label.form-label(for="dni") DNI
+        input.form-control(type="number" name="dni" value=paciente.dni required)
+
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="fechaNacimiento") Fecha de nacimiento
+        input.form-control(type="date" name="fechaNacimiento" value=paciente.fechaNacimiento.toISOString().split('T')[0] required)
+
+      .col-md-6
+        label.form-label(for="sexo") Sexo
+        select.form-select(name="sexo" required)
+          option(value="F" selected=paciente.sexo === 'F') Femenino
+          option(value="M" selected=paciente.sexo === 'M') Masculino
+          option(value="X" selected=paciente.sexo === 'X') Otro
+
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="telefono") Teléfono
+        input.form-control(type="text" name="telefono" value=paciente.telefono)
+
+      .col-md-6
+        label.form-label(for="direccion") Dirección
+        input.form-control(type="text" name="direccion" value=paciente.direccion)
+
+    .row.mb-4
+      .col-md-12
+        label.form-label(for="obraSocial") Obra Social
+        input.form-control(type="text" name="obraSocial" value=paciente.obraSocial)
+
+    .text-center
+      button.btn.btn-success(type="submit") 💾 Guardar cambios
+      a.btn.btn-secondary.ms-2(href="/pacientes/listado") Cancelar

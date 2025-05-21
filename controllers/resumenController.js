@@ -3,7 +3,7 @@ const { Paciente, Internacion, Cama, Habitacion, Ala, EvaluacionEnfermeria, Eval
 const mostrarResumen = async (req, res) => {
   try {
     const paciente = await Paciente.findByPk(req.params.pacienteId);
-    if (!paciente) return res.status(404).send('Paciente no encontrado');
+    if (!paciente) return res.render('error', { mensaje: 'Paciente no encontrado' });
 
     const internacion = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' },
@@ -27,7 +27,7 @@ const mostrarResumen = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al generar resumen');
+    res.render('error', { mensaje: 'Error al generar resumen' });
   }
 };
 

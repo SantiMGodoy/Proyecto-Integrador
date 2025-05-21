@@ -1,31 +1,44 @@
 extends layout
 
 block content
-  h1 Registrar nuevo paciente
+  h2.text-center.mb-4 Registrar nuevo paciente
 
   form(action="/pacientes" method="POST")
-    div
-      label Nombre:
-      input(type="text" name="nombre" required)
-    div
-      label DNI:
-      input(type="text" name="dni" required)
-    div
-      label Fecha de Nacimiento:
-      input(type="date" name="fechaNacimiento" required)
-    div
-      label Sexo:
-      select(name="sexo" required)
-        option(value="Masculino") Masculino
-        option(value="Femenino") Femenino
-    div
-      label Teléfono:
-      input(type="text" name="telefono")
-    div
-      label Dirección:
-      input(type="text" name="direccion")
-    div
-      label Obra Social:
-      input(type="text" name="obraSocial")
-    div
-      button(type="submit") Registrar
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="nombre") Nombre
+        input.form-control(type="text" name="nombre" required)
+
+      .col-md-6
+        label.form-label(for="dni") DNI
+        input.form-control(type="number" name="dni" required)
+
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="fechaNacimiento") Fecha de nacimiento
+        input.form-control(type="date" name="fechaNacimiento" required)
+
+      .col-md-6
+        label.form-label(for="sexo") Sexo
+        select.form-select(name="sexo" required)
+          option(value="" disabled selected) Seleccionar
+          option(value="F") Femenino
+          option(value="M") Masculino
+          option(value="X") Otro
+
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="telefono") Teléfono
+        input.form-control(type="text" name="telefono")
+
+      .col-md-6
+        label.form-label(for="direccion") Dirección
+        input.form-control(type="text" name="direccion")
+
+    .row.mb-4
+      .col-md-12
+        label.form-label(for="obraSocial") Obra Social
+        input.form-control(type="text" name="obraSocial")
+
+    .text-center
+      button.btn.btn-primary.btn-lg(type="submit") Registrar Paciente

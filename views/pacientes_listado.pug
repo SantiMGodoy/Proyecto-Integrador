@@ -1,0 +1,74 @@
+extends layout
+
+block content
+  h2.text-center.mb-4 Lista de todos los pacientes
+
+  form.mb-4(method="GET" action="/pacientes/listado")
+    .input-group
+      input.form-control(type="text" name="q" placeholder="Buscar por nombre o DNI" value=query)
+      button.btn.btn-outline-primary(type="submit") 🔍 Buscar
+
+  if pacientes.length
+    table.table.table-striped.table-bordered
+      thead
+        tr
+          th ID
+          th Nombre
+          th DNI
+          th Fecha de Nacimiento
+          th Sexo
+          th Obra Social
+          th Internación
+          th Acciones
+      tbody
+        each paciente in pacientes
+          tr
+            td #{paciente.id}
+            td #{paciente.nombre}
+            td #{paciente.dni}
+            td #{paciente.fechaNacimiento.toISOString().split('T')[0]}
+            td #{paciente.sexo}
+            td #{paciente.obraSocial}
+            td
+              if paciente.Internacions && paciente.Internacions.length > 0
+                - const internacion = paciente.Internacions[0];
+                p.mb-0 Cama: #{internacion.Cama.numero}
+                p.mb-0 Habitación: #{internacion.Cama.Habitacion.numero}
+                p.mb-0 Ala: #{internacion.Cama.Habitacion.Ala.nombre}
+                p.mb-0 Ingreso: #{internacion.fechaIngreso.toISOString().split('T')[0]}
+              else
+                span.text-muted No internado
+            td
+              a.btn.btn-sm.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen
+              a.btn.btn-sm.btn-outline-primary.ms-1(href=`/internacion/asignar/${paciente.id}`) Asignar cama
+              a.btn.btn-sm.btn-outline-success.ms-1(href=`/enfermeria/registrar/${paciente.id}`) Evaluar
+              a.btn.btn-sm.btn-outline-warning.ms-1(href=`/pacientes/editar/${paciente.id}`) ✏️ Editar
+              form(action=`/pacientes/eliminar/${paciente.id}` method="POST" style="display:inline" onsubmit="return confirm('¿Estás seguro de eliminar este paciente?');")
+                button.btn.btn-sm.btn-outline-danger.ms-1(type="submit") 🗑️ Eliminar
+
+    // Paginación
+    nav(aria-label="Paginación" class="mt-4")
+      ul.pagination.justify-content-center
+        if currentPage > 1
+          li.page-item
+            a.page-link(href=`/pacientes/listado?page=${currentPage - 1}${query ? '&q=' + query : ''}`) « Anterior
+        else
+          li.page-item.disabled
+            span.page-link « Anterior
+
+        each page in Array(totalPages).fill().map((_, i) => i + 1)
+          if page === currentPage
+            li.page-item.active
+              span.page-link #{page}
+          else
+            li.page-item
+              a.page-link(href=`/pacientes/listado?page=${page}${query ? '&q=' + query : ''}`) #{page}
+
+        if currentPage < totalPages
+          li.page-item
+            a.page-link(href=`/pacientes/listado?page=${currentPage + 1}${query ? '&q=' + query : ''}`) Siguiente »
+        else
+          li.page-item.disabled
+            span.page-link Siguiente »
+  else
+    .alert.alert-warning No se encontraron pacientes con ese criterio de búsqueda.

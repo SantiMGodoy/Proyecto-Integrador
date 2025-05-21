@@ -59,3 +59,11 @@ block content
           form(action="/pacientes/opciones" method="GET")
             input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
             button.btn.btn-outline-dark(type="submit") Ver opciones
+  .row.text-center
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 📋 Ver todos los pacientes
+          p.card-text Lista completa de todos los pacientes registrados.
+          a.btn.btn-dark(href="/pacientes/listado") Ver pacientes
+

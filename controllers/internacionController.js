@@ -3,15 +3,13 @@ const { Paciente, Cama, Habitacion, Ala, Internacion } = require('../models');
 const mostrarFormularioAsignacion = async (req, res) => {
   try {
     const paciente = await Paciente.findByPk(req.params.pacienteId);
-    if (!paciente) return res.status(404).send('Paciente no encontrado');
+    if (!paciente) return res.render('error', { mensaje: 'Paciente no encontrado' });
 
-    // Buscamos camas libres
     const camasDisponibles = await Cama.findAll({
       where: { estado: 'libre' },
       include: [{ model: Habitacion, include: [Ala] }]
     });
 
-    // Filtramos por compatibilidad de sexo si hay otra cama ocupada en la misma habitacion
     const camasFiltradas = [];
 
     for (let cama of camasDisponibles) {
@@ -22,10 +20,10 @@ const mostrarFormularioAsignacion = async (req, res) => {
       const camasOcupadas = habitacion.Camas.filter(c => c.estado === 'ocupada');
 
       if (camasOcupadas.length === 0) {
-        camasFiltradas.push(cama); // habitacion libre
+        camasFiltradas.push(cama); // habitación vacía
       } else {
         if (camasOcupadas[0].sexoOcupante === paciente.sexo) {
-          camasFiltradas.push(cama);
+          camasFiltradas.push(cama); // misma compatibilidad de sexo
         }
       }
     }
@@ -33,7 +31,7 @@ const mostrarFormularioAsignacion = async (req, res) => {
     res.render('asignar_cama', { paciente, camas: camasFiltradas });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al buscar camas');
+    res.render('error', { mensaje: 'Error al buscar camas disponibles' });
   }
 };
 
@@ -44,7 +42,7 @@ const asignarCama = async (req, res) => {
     const cama = await Cama.findByPk(camaId);
 
     if (!paciente || !cama || cama.estado !== 'libre') {
-      return res.status(400).send('Error en la asignación');
+      return res.render('error', { mensaje: 'Datos inválidos para la asignación de cama' });
     }
 
     await cama.update({
@@ -59,10 +57,13 @@ const asignarCama = async (req, res) => {
       estado: 'activa'
     });
 
-    res.send('Cama asignada correctamente');
+    res.render('exito', {
+      mensaje: 'Cama asignada correctamente',
+      resumenId: paciente.id
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al asignar cama');
+    res.render('error', { mensaje: 'Error al asignar cama' });
   }
 };
 
@@ -74,7 +75,7 @@ const cancelarAdmision = async (req, res) => {
     });
 
     if (!internacion) {
-      return res.status(404).send('No se encontró una internación activa para cancelar');
+      return res.render('error', { mensaje: 'No se encontró una internación activa para cancelar' });
     }
 
     await internacion.Cama.update({
@@ -84,10 +85,13 @@ const cancelarAdmision = async (req, res) => {
 
     await internacion.update({ estado: 'cancelada' });
 
-    res.redirect(`/resumen/${req.params.pacienteId}`);
+    res.render('exito', {
+      mensaje: 'Internación cancelada correctamente',
+      resumenId: req.params.pacienteId
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al cancelar internación');
+    res.render('error', { mensaje: 'Error al cancelar internación' });
   }
 };
 
@@ -99,28 +103,28 @@ const darDeAlta = async (req, res) => {
     });
 
     if (!internacion) {
-      return res.status(404).send('No se encontró internación activa para alta');
+      return res.render('error', { mensaje: 'No se encontró internación activa para dar de alta' });
     }
 
-    // Liberar cama
     await internacion.Cama.update({
       estado: 'libre',
       sexoOcupante: null
     });
 
-    // Finalizar internación
     await internacion.update({
       estado: 'finalizada',
       fechaAlta: new Date()
     });
 
-    res.redirect(`/resumen/${req.params.pacienteId}`);
+    res.render('exito', {
+      mensaje: 'Paciente dado de alta correctamente',
+      resumenId: req.params.pacienteId
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al dar de alta al paciente');
+    res.render('error', { mensaje: 'Error al dar de alta al paciente' });
   }
 };
-
 
 module.exports = {
   mostrarFormularioAsignacion,
