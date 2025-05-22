@@ -34,11 +34,36 @@ block content
         label.form-label(for="direccion") Dirección
         input.form-control(type="text" name="direccion" value=paciente.direccion)
 
-    .row.mb-4
-      .col-md-12
+    .row.mb-3
+      .col-md-6
         label.form-label(for="obraSocial") Obra Social
         input.form-control(type="text" name="obraSocial" value=paciente.obraSocial)
 
+      .col-md-6
+        label.form-label(for="viaIngreso") Vía de ingreso
+        select.form-select(name="viaIngreso" id="viaIngreso" required onchange="toggleMedico()")
+          option(value="") Seleccionar...
+          option(value="programada" selected=paciente.viaIngreso === 'programada') Cita programada
+          option(value="derivacion" selected=paciente.viaIngreso === 'derivacion') Derivación médica
+          option(value="emergencia" selected=paciente.viaIngreso === 'emergencia') Emergencia
+
+    .row.mb-3
+      .col-md-6
+        label.form-label(for="medicoDerivante") Médico derivante (si aplica)
+        input.form-control(type="text" name="medicoDerivante" id="medicoDerivante" value=paciente.medicoDerivante)
+
     .text-center
-      button.btn.btn-success(type="submit") 💾 Guardar cambios
-      a.btn.btn-secondary.ms-2(href="/pacientes/listado") Cancelar
+      button.btn.btn-primary.btn-lg(type="submit") Guardar cambios
+
+  script.
+    function toggleMedico() {
+      const select = document.getElementById('viaIngreso');
+      const input = document.getElementById('medicoDerivante');
+      if (select.value === 'derivacion') {
+        input.removeAttribute('disabled');
+      } else {
+        input.setAttribute('disabled', 'true');
+        input.value = '';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', toggleMedico);

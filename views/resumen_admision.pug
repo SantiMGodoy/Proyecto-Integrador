@@ -11,6 +11,10 @@ block content
   p Teléfono: #{paciente.telefono}
   p Dirección: #{paciente.direccion}
   p Obra Social: #{paciente.obraSocial}
+  - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
+  p Vía de ingreso: #{via}
+  if paciente.medicoDerivante
+    p Médico derivante: #{paciente.medicoDerivante}
 
   if internacion
     h2 Internación

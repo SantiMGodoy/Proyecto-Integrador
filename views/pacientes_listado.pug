@@ -19,6 +19,7 @@ block content
           th Sexo
           th Obra Social
           th Internación
+          th Vía de ingreso
           th Acciones
       tbody
         each paciente in pacientes
@@ -39,6 +40,12 @@ block content
               else
                 span.text-muted No internado
             td
+              - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
+              | #{via}
+              if paciente.medicoDerivante
+                br
+                small.text-muted #{paciente.medicoDerivante}
+            td
               a.btn.btn-sm.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen
               a.btn.btn-sm.btn-outline-primary.ms-1(href=`/internacion/asignar/${paciente.id}`) Asignar cama
               a.btn.btn-sm.btn-outline-success.ms-1(href=`/enfermeria/registrar/${paciente.id}`) Evaluar
@@ -46,7 +53,6 @@ block content
               form(action=`/pacientes/eliminar/${paciente.id}` method="POST" style="display:inline" onsubmit="return confirm('¿Estás seguro de eliminar este paciente?');")
                 button.btn.btn-sm.btn-outline-danger.ms-1(type="submit") 🗑️ Eliminar
 
-    // Paginación
     nav(aria-label="Paginación" class="mt-4")
       ul.pagination.justify-content-center
         if currentPage > 1

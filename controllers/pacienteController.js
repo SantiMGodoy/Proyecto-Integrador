@@ -6,14 +6,49 @@ const mostrarFormulario = (req, res) => {
 
 const registrarPaciente = async (req, res) => {
   try {
-    const { nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial } = req.body;
+    const {
+      nombre,
+      dni,
+      fechaNacimiento,
+      sexo,
+      telefono,
+      direccion,
+      obraSocial,
+      viaIngreso,
+      medicoDerivante
+    } = req.body;
+
+    if (viaIngreso === 'derivacion' && (!medicoDerivante || medicoDerivante.trim() === '')) {
+      return res.render('error', {
+        mensaje: 'Debes ingresar el nombre del medico derivante si la via de ingreso es una derivacion medica.'
+      });
+    }
 
     let paciente = await Paciente.findOne({ where: { dni } });
 
     if (paciente) {
-      await paciente.update({ nombre, fechaNacimiento, sexo, telefono, direccion, obraSocial });
+      await paciente.update({
+        nombre,
+        fechaNacimiento,
+        sexo,
+        telefono,
+        direccion,
+        obraSocial,
+        viaIngreso,
+        medicoDerivante
+      });
     } else {
-      paciente = await Paciente.create({ nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial });
+      paciente = await Paciente.create({
+        nombre,
+        dni,
+        fechaNacimiento,
+        sexo,
+        telefono,
+        direccion,
+        obraSocial,
+        viaIngreso,
+        medicoDerivante
+      });
     }
 
     res.render('exito', {

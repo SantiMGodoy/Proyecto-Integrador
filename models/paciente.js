@@ -21,7 +21,10 @@ module.exports = (sequelize, DataTypes) => {
     sexo: DataTypes.STRING,
     telefono: DataTypes.STRING,
     direccion: DataTypes.STRING,
-    obraSocial: DataTypes.STRING
+    obraSocial: DataTypes.STRING,
+    viaIngreso: DataTypes.STRING,
+    medicoDerivante: DataTypes.STRING
+
   }, {
     sequelize,
     modelName: 'Paciente',
