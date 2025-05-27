@@ -16,6 +16,11 @@ block content
   if paciente.medicoDerivante
     p Médico derivante: #{paciente.medicoDerivante}
 
+  if paciente.viaIngreso === 'emergencia'
+    .alert.alert-warning.mt-3
+      strong ⚠ Atención:
+      | El paciente ingresó por emergencia. Solo se registraron los datos básicos y su internación.
+
   if internacion
     h2 Internación
     p Fecha de ingreso: #{internacion.fechaIngreso}

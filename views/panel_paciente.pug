@@ -14,12 +14,16 @@ block content
       .card.shadow-sm
         .card-body
           h5.card-title 👩‍⚕️ Evaluación de enfermería
+          if paciente.viaIngreso === 'emergencia'
+            p.text-muted (opcional)
           a.btn.btn-success(href=`/enfermeria/registrar/${paciente.id}`) Ir
 
     .col-md-4
       .card.shadow-sm
         .card-body
           h5.card-title 👨‍⚕️ Evaluación médica
+          if paciente.viaIngreso === 'emergencia'
+            p.text-muted (opcional)
           a.btn.btn-info(href=`/medica/registrar/${paciente.id}`) Ir
 
   .row.text-center.mt-4
