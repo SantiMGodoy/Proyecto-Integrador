@@ -5,7 +5,6 @@ block content
     h1 Sistema de Admisión Hospitalaria
     p.lead Bienvenido al módulo de internación HIS.
 
-    // Contador de internados activos
     if totalInternados > 0
       .alert.alert-info.mt-3
         | 👥 Hay actualmente 
@@ -15,7 +14,6 @@ block content
       .alert.alert-warning.mt-3
         | No hay pacientes internados en este momento.
 
-  // Guía rápida de uso
   .card.mt-4.mb-5
     .card-body
       h5.card-title.text-primary ℹ️ ¿Cómo usar el sistema?
@@ -59,7 +57,8 @@ block content
           form(action="/pacientes/opciones" method="GET")
             input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
             button.btn.btn-outline-dark(type="submit") Ver opciones
-  .row.text-center
+
+  .row.text-center.mt-4
     .col-md-4
       .card.shadow-sm
         .card-body
@@ -67,3 +66,9 @@ block content
           p.card-text Lista completa de todos los pacientes registrados.
           a.btn.btn-dark(href="/pacientes/listado") Ver pacientes
 
+    .col-md-4
+      .card.shadow-sm
+        .card-body
+          h5.card-title 🛏️ Estado de camas
+          p.card-text Visualizar camas ocupadas, libres e higienizadas
+          a.btn.btn-outline-info(href="/internacion/camas") Ver camas

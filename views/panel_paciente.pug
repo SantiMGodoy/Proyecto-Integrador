@@ -32,3 +32,13 @@ block content
         .card-body
           h5.card-title 📋 Ver resumen del paciente
           a.btn.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen
+
+  .row.text-center.mt-4
+    .col-md-6.offset-md-3
+      .card.shadow-sm
+        .card-body
+          h5.card-title 🛏️ Estado de camas
+          p.text-muted Ver disponibilidad general del hospital
+          a.btn.btn-outline-info(href="/internacion/camas") Ver camas
+
+  a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio

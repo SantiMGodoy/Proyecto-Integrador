@@ -80,7 +80,9 @@ const cancelarAdmision = async (req, res) => {
 
     await internacion.Cama.update({
       estado: 'libre',
-      sexoOcupante: null
+      sexoOcupante: null,
+      higienizada: false
+
     });
 
     await internacion.update({ estado: 'cancelada' });
@@ -108,7 +110,9 @@ const darDeAlta = async (req, res) => {
 
     await internacion.Cama.update({
       estado: 'libre',
-      sexoOcupante: null
+      sexoOcupante: null,
+      higienizada: false
+
     });
 
     await internacion.update({
@@ -126,9 +130,26 @@ const darDeAlta = async (req, res) => {
   }
 };
 
+const higienizarCama = async (req, res) => {
+  try {
+    const cama = await Cama.findByPk(req.params.id);
+    if (!cama) return res.render('error', { mensaje: 'Cama no encontrada' });
+
+    await cama.update({ higienizada: true });
+
+    res.redirect('/internacion/camas?msg=ok');
+  } catch (err) {
+    console.error(err);
+    res.render('error', { mensaje: 'Error al higienizar cama' });
+  }
+};
+
+
+
 module.exports = {
   mostrarFormularioAsignacion,
   asignarCama,
   cancelarAdmision,
-  darDeAlta
+  darDeAlta,
+  higienizarCama
 };

@@ -1,0 +1,51 @@
+extends layout
+
+block content
+  h2.text-center.mb-4 Estado de camas del hospital
+
+  if mensaje
+    .alert.alert-success.text-center #{mensaje}
+
+  table.table.table-bordered.table-striped
+    thead
+      tr
+        th N°
+        th Estado
+        th Higienizada
+        th Ocupante
+        th Sexo Ocupante
+        th Habitación
+        th Ala
+        th Acción
+    tbody
+      each cama in camas
+        tr
+          td #{cama.numero}
+          td
+            if cama.estado === 'ocupada'
+              span.text-danger Ocupada
+            else
+              span.text-success Libre
+          td
+            if cama.higienizada
+              span.text-success ✅
+            else
+              span.text-danger ❌
+          td
+            if cama.estado === 'ocupada' && camaOcupacion[cama.id]
+              = camaOcupacion[cama.id].nombre
+            else
+              i.text-muted No asignado
+          td #{cama.sexoOcupante || '-'}
+          td #{cama.Habitacion.numero}
+          td #{cama.Habitacion.Ala.nombre}
+          td
+            if !cama.higienizada && cama.estado === 'libre'
+              form(action=`/internacion/cama/higienizar/${cama.id}` method="POST")
+                button.btn.btn-sm.btn-outline-success(type="submit") Higienizar
+            else if cama.higienizada
+              span.text-muted Limpia
+            else
+              span.text-muted No disponible
+
+  a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio
