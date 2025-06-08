@@ -3,7 +3,12 @@ const { Paciente, Internacion, Cama, Habitacion, Ala, EvaluacionEnfermeria, Eval
 const mostrarResumen = async (req, res) => {
   try {
     const paciente = await Paciente.findByPk(req.params.pacienteId);
-    if (!paciente) return res.render('error', { mensaje: 'Paciente no encontrado' });
+    if (!paciente) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Paciente no encontrado'
+      });
+    }
 
     const internacion = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' },
@@ -16,8 +21,13 @@ const mostrarResumen = async (req, res) => {
       }
     });
 
-    const evaluacionEnfermeria = await EvaluacionEnfermeria.findOne({ where: { PacienteId: paciente.id } });
-    const evaluacionMedica = await EvaluacionMedica.findOne({ where: { PacienteId: paciente.id } });
+    const evaluacionEnfermeria = await EvaluacionEnfermeria.findOne({
+      where: { PacienteId: paciente.id }
+    });
+
+    const evaluacionMedica = await EvaluacionMedica.findOne({
+      where: { PacienteId: paciente.id }
+    });
 
     res.render('resumen_admision', {
       paciente,
@@ -27,7 +37,10 @@ const mostrarResumen = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.render('error', { mensaje: 'Error al generar resumen' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al generar resumen'
+    });
   }
 };
 

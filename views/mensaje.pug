@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .alert.text-center.mt-5(class=tipo === 'exito' ? 'alert-success' : 'alert-danger')
+    h3.mb-3 
+      if tipo === 'exito'
+        | ✅ #{mensaje}
+      else
+        | ❌ #{mensaje}
+
+    if resumenId
+      a.btn.btn-outline-secondary.me-2(href=`/resumen/${resumenId}`) Ver resumen del paciente
+
+  .text-center.mt-4
+    a.btn.btn-primary(href="/") Volver al inicio

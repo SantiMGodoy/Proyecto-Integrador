@@ -3,14 +3,21 @@ const { Paciente, Cama, Habitacion, Ala, Internacion } = require('../models');
 const mostrarFormularioAsignacion = async (req, res) => {
   try {
     const paciente = await Paciente.findByPk(req.params.pacienteId);
-    if (!paciente) return res.render('error', { mensaje: 'Paciente no encontrado' });
+    if (!paciente) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Paciente no encontrado'
+      });
+    }
 
-    // 🚫 Prevenir doble internación
     const yaInternado = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' }
     });
     if (yaInternado) {
-      return res.render('error', { mensaje: 'El paciente ya tiene una internación activa.' });
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'El paciente ya tiene una internación activa.'
+      });
     }
 
     const camasDisponibles = await Cama.findAll({
@@ -37,7 +44,7 @@ const mostrarFormularioAsignacion = async (req, res) => {
     res.render('asignar_cama', { paciente, camas: camasFiltradas });
   } catch (err) {
     console.error(err);
-    res.render('error', { mensaje: 'Error al buscar camas disponibles' });
+    res.render('mensaje', { tipo: 'error', mensaje: 'Error al buscar camas disponibles' });
   }
 };
 
@@ -46,23 +53,25 @@ const asignarCama = async (req, res) => {
     const { camaId } = req.body;
     const paciente = await Paciente.findByPk(req.params.pacienteId);
 
-    // 🚫 Validar que el paciente no tenga internación activa
     const yaInternado = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' }
     });
     if (yaInternado) {
-      return res.render('error', { mensaje: 'El paciente ya tiene una cama asignada.' });
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'El paciente ya tiene una cama asignada.'
+      });
     }
 
     const cama = await Cama.findByPk(camaId, {
-      include: {
-        model: Habitacion,
-        include: [Cama]
-      }
+      include: { model: Habitacion, include: [Cama] }
     });
 
     if (!paciente || !cama || cama.estado !== 'libre' || !cama.higienizada) {
-      return res.render('error', { mensaje: 'Cama no disponible para asignar' });
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Cama no disponible para asignar'
+      });
     }
 
     const habitacion = cama.Habitacion;
@@ -71,13 +80,16 @@ const asignarCama = async (req, res) => {
     if (camasOcupadas.length > 0) {
       const ocupanteSexo = camasOcupadas[0].sexoOcupante;
       if (ocupanteSexo !== paciente.sexo) {
-        return res.render('error', { mensaje: 'No se puede asignar cama: habitación con ocupante de distinto sexo' });
+        return res.render('mensaje', {
+          tipo: 'error',
+          mensaje: 'No se puede asignar cama: habitación con ocupante de distinto sexo'
+        });
       }
     }
 
     await cama.update({
       estado: 'ocupada',
-      sexoOcupante: paciente.sexo,
+      sexoOcupante: paciente.sexo
     });
 
     await Internacion.create({
@@ -87,13 +99,14 @@ const asignarCama = async (req, res) => {
       estado: 'activa'
     });
 
-    res.render('exito', {
+    res.render('mensaje', {
+      tipo: 'exito',
       mensaje: 'Cama asignada correctamente',
       resumenId: paciente.id
     });
   } catch (err) {
     console.error(err);
-    res.render('error', { mensaje: 'Error al asignar cama' });
+    res.render('mensaje', { tipo: 'error', mensaje: 'Error al asignar cama' });
   }
 };
 
@@ -105,7 +118,10 @@ const cancelarAdmision = async (req, res) => {
     });
 
     if (!internacion) {
-      return res.render('error', { mensaje: 'No se encontró una internación activa para cancelar' });
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'No se encontró una internación activa para cancelar'
+      });
     }
 
     await internacion.Cama.update({
@@ -116,13 +132,17 @@ const cancelarAdmision = async (req, res) => {
 
     await internacion.update({ estado: 'cancelada' });
 
-    res.render('exito', {
+    res.render('mensaje', {
+      tipo: 'exito',
       mensaje: 'Internación cancelada correctamente',
       resumenId: req.params.pacienteId
     });
   } catch (error) {
     console.error(error);
-    res.render('error', { mensaje: 'Error al cancelar internación' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al cancelar internación'
+    });
   }
 };
 
@@ -134,7 +154,10 @@ const darDeAlta = async (req, res) => {
     });
 
     if (!internacion) {
-      return res.render('error', { mensaje: 'No se encontró internación activa para dar de alta' });
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'No se encontró internación activa para dar de alta'
+      });
     }
 
     await internacion.Cama.update({
@@ -148,27 +171,72 @@ const darDeAlta = async (req, res) => {
       fechaAlta: new Date()
     });
 
-    res.render('exito', {
+    res.render('mensaje', {
+      tipo: 'exito',
       mensaje: 'Paciente dado de alta correctamente',
       resumenId: req.params.pacienteId
     });
   } catch (error) {
     console.error(error);
-    res.render('error', { mensaje: 'Error al dar de alta al paciente' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al dar de alta al paciente'
+    });
   }
 };
 
 const higienizarCama = async (req, res) => {
   try {
     const cama = await Cama.findByPk(req.params.id);
-    if (!cama) return res.render('error', { mensaje: 'Cama no encontrada' });
+    if (!cama) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Cama no encontrada'
+      });
+    }
 
     await cama.update({ higienizada: true });
 
     res.redirect('/internacion/camas?msg=ok');
   } catch (err) {
     console.error(err);
-    res.render('error', { mensaje: 'Error al higienizar cama' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al higienizar cama'
+    });
+  }
+};
+
+const mostrarEstadoCamas = async (req, res) => {
+  try {
+    const camas = await Cama.findAll({
+      include: {
+        model: Habitacion,
+        include: [Ala]
+      },
+      order: [['HabitacionId', 'ASC'], ['numero', 'ASC']]
+    });
+
+    const internaciones = await Internacion.findAll({
+      where: { estado: 'activa' },
+      include: [Paciente, Cama]
+    });
+
+    const camaOcupacion = {};
+    internaciones.forEach(internacion => {
+      camaOcupacion[internacion.CamaId] = internacion.Paciente;
+    });
+
+    const mensaje = req.query.msg === 'ok' ? 'Cama higienizada correctamente ✅' : null;
+
+    res.render('camas_estado', {
+      camas,
+      camaOcupacion,
+      mensaje
+    });
+  } catch (err) {
+    console.error(err);
+    res.render('mensaje', { tipo: 'error', mensaje: 'Error al mostrar el estado de camas' });
   }
 };
 
@@ -177,5 +245,6 @@ module.exports = {
   asignarCama,
   cancelarAdmision,
   darDeAlta,
-  higienizarCama
+  higienizarCama,
+  mostrarEstadoCamas
 };

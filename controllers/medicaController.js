@@ -2,16 +2,28 @@ const { Paciente, Internacion, EvaluacionMedica } = require('../models');
 
 const mostrarFormulario = async (req, res) => {
   const paciente = await Paciente.findByPk(req.params.pacienteId);
-  if (!paciente) return res.render('error', { mensaje: 'Paciente no encontrado' });
+  if (!paciente) {
+    return res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Paciente no encontrado'
+    });
+  }
   res.render('evaluacion_medica', { paciente });
 };
 
 const registrarEvaluacion = async (req, res) => {
   try {
     const { pacienteId } = req.params;
-    const internacion = await Internacion.findOne({ where: { PacienteId: pacienteId, estado: 'activa' } });
+    const internacion = await Internacion.findOne({
+      where: { PacienteId: pacienteId, estado: 'activa' }
+    });
 
-    if (!internacion) return res.render('error', { mensaje: 'No hay internación activa' });
+    if (!internacion) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'No hay internación activa'
+      });
+    }
 
     await EvaluacionMedica.create({
       PacienteId: pacienteId,
@@ -19,13 +31,17 @@ const registrarEvaluacion = async (req, res) => {
       ...req.body
     });
 
-    res.render('exito', {
+    res.render('mensaje', {
+      tipo: 'exito',
       mensaje: 'Evaluación médica registrada',
       resumenId: pacienteId
     });
   } catch (err) {
     console.error(err);
-    res.render('error', { mensaje: 'Error al registrar evaluación médica' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al registrar evaluación médica'
+    });
   }
 };
 
