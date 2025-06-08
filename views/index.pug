@@ -32,32 +32,6 @@ block content
           p.card-text Alta de un nuevo paciente al sistema.
           a.btn.btn-primary.btn-lg(href="/pacientes/nuevo") Ir al formulario
 
-    .col-md-4
-      .card.shadow-sm
-        .card-body
-          h5.card-title 🧾 Pacientes Internados
-          p.card-text Ver todos los pacientes con internación activa.
-          a.btn.btn-success.btn-lg(href="/pacientes/internados") Ver lista
-
-    .col-md-4
-      .card.shadow-sm
-        .card-body
-          h5.card-title 📋 Resumen de Admisión
-          p.card-text Ver resumen completo de un paciente por ID.
-          form(action="/resumen" method="GET")
-            input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
-            button.btn.btn-outline-primary(type="submit") Ver resumen
-
-  .row.text-center
-    .col-md-6.offset-md-3
-      .card.shadow-sm.mt-4
-        .card-body
-          h5.card-title 🔍 Gestión rápida por paciente
-          p.card-text Ingresá el ID de un paciente para acceder a todas las opciones disponibles.
-          form(action="/pacientes/opciones" method="GET")
-            input.form-control.mb-2(type="number" name="id" placeholder="ID del paciente" required)
-            button.btn.btn-outline-dark(type="submit") Ver opciones
-
   .row.text-center.mt-4
     .col-md-4
       .card.shadow-sm

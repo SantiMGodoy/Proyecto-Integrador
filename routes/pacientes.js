@@ -2,31 +2,9 @@ const express = require('express');
 const router = express.Router();
 const pacienteController = require('../controllers/pacienteController');
 
-// Rutas controladas por archivo pacienteController.js
 router.get('/nuevo', pacienteController.mostrarFormulario);
 router.post('/', pacienteController.registrarPaciente);
 
-// Listado de pacientes internados
-router.get('/internados', async (req, res) => {
-  const { Paciente, Internacion, Cama, Habitacion, Ala } = require('../models');
-
-  try {
-    const internaciones = await Internacion.findAll({
-      where: { estado: 'activa' },
-      include: [
-        { model: Paciente },
-        { model: Cama, include: { model: Habitacion, include: Ala } }
-      ]
-    });
-
-    res.render('lista_internados', { internaciones });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al obtener pacientes internados');
-  }
-});
-
-// Gestión rápida por ID
 router.get('/opciones', async (req, res) => {
   const id = req.query.id;
   const { Paciente } = require('../models');
@@ -45,9 +23,9 @@ router.get('/opciones', async (req, res) => {
 router.get('/listado', async (req, res) => {
   const { Paciente, Internacion, Cama, Habitacion, Ala } = require('../models');
   const { Op } = require('sequelize');
-  const { q } = req.query;
+  const { q, filtro } = req.query;
   const page = parseInt(req.query.page) || 1;
-  const limit = 10;
+  const limit = 5;
   const offset = (page - 1) * limit;
 
   try {
@@ -61,22 +39,28 @@ router.get('/listado', async (req, res) => {
       };
     }
 
+    const includeInternacion = {
+      model: Internacion,
+      required: filtro === 'internados' ? true : false,
+      where: filtro === 'internados'
+        ? { estado: 'activa' }
+        : filtro === 'no_internados'
+        ? { estado: { [Op.ne]: 'activa' } }
+        : undefined,
+      include: {
+        model: Cama,
+        include: {
+          model: Habitacion,
+          include: Ala
+        }
+      }
+    };
+
     const pacientes = await Paciente.findAndCountAll({
       where: whereClause,
       limit,
       offset,
-      include: {
-        model: Internacion,
-        where: { estado: 'activa' },
-        required: false,
-        include: {
-          model: Cama,
-          include: {
-            model: Habitacion,
-            include: Ala
-          }
-        }
-      }
+      include: includeInternacion
     });
 
     res.render('pacientes_listado', {
@@ -84,7 +68,8 @@ router.get('/listado', async (req, res) => {
       total: pacientes.count,
       currentPage: page,
       totalPages: Math.ceil(pacientes.count / limit),
-      query: q
+      query: q,
+      filtro
     });
   } catch (err) {
     console.error(err);
@@ -135,10 +120,5 @@ router.post('/eliminar/:id', async (req, res) => {
     res.render('error', { mensaje: 'Error al eliminar paciente.' });
   }
 });
-
-
-
-
-
 
 module.exports = router;

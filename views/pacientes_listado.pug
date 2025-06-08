@@ -1,12 +1,19 @@
 extends layout
 
 block content
-  h2.text-center.mb-4 Lista de todos los pacientes
+  h2.text-center.mb-4 Lista de pacientes
 
   form.mb-4(method="GET" action="/pacientes/listado")
-    .input-group
-      input.form-control(type="text" name="q" placeholder="Buscar por nombre o DNI" value=query)
-      button.btn.btn-outline-primary(type="submit") 🔍 Buscar
+    .row.mb-2
+      .col-md-4
+        .input-group
+          input.form-control(type="text" name="q" placeholder="Buscar por nombre o DNI" value=query)
+          button.btn.btn-outline-primary(type="submit") 🔍 Buscar
+      .col-md-4.offset-md-4
+        select.form-select(name="filtro" onchange="this.form.submit()")
+          option(value="" selected=(!filtro || filtro === '')) Todos los pacientes
+          option(value="internados" selected=(filtro==='internados')) Solo internados
+          option(value="no_internados" selected=(filtro==='no_internados')) No internados
 
   if pacientes.length
     table.table.table-striped.table-bordered
@@ -31,12 +38,12 @@ block content
             td #{paciente.sexo}
             td #{paciente.obraSocial}
             td
-              if paciente.Internacions && paciente.Internacions.length > 0
-                - const internacion = paciente.Internacions[0];
-                p.mb-0 Cama: #{internacion.Cama.numero}
-                p.mb-0 Habitación: #{internacion.Cama.Habitacion.numero}
-                p.mb-0 Ala: #{internacion.Cama.Habitacion.Ala.nombre}
-                p.mb-0 Ingreso: #{internacion.fechaIngreso.toISOString().split('T')[0]}
+              - const activa = paciente.Internacions.find(i => i.estado === 'activa');
+              if activa
+                p.mb-0 Cama: #{activa.Cama.numero}
+                p.mb-0 Habitación: #{activa.Cama.Habitacion.numero}
+                p.mb-0 Ala: #{activa.Cama.Habitacion.Ala.nombre}
+                p.mb-0 Ingreso: #{activa.fechaIngreso.toISOString().split('T')[0]}
               else
                 span.text-muted No internado
             td
@@ -46,9 +53,7 @@ block content
                 br
                 small.text-muted #{paciente.medicoDerivante}
             td
-              a.btn.btn-sm.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen
-              a.btn.btn-sm.btn-outline-primary.ms-1(href=`/internacion/asignar/${paciente.id}`) Asignar cama
-              a.btn.btn-sm.btn-outline-success.ms-1(href=`/enfermeria/registrar/${paciente.id}`) Evaluar
+              a.btn.btn-sm.btn-outline-secondary(href=`/pacientes/opciones?id=${paciente.id}`) ⚙ Gestionar
               a.btn.btn-sm.btn-outline-warning.ms-1(href=`/pacientes/editar/${paciente.id}`) ✏️ Editar
               form(action=`/pacientes/eliminar/${paciente.id}` method="POST" style="display:inline" onsubmit="return confirm('¿Estás seguro de eliminar este paciente?');")
                 button.btn.btn-sm.btn-outline-danger.ms-1(type="submit") 🗑️ Eliminar
@@ -57,7 +62,7 @@ block content
       ul.pagination.justify-content-center
         if currentPage > 1
           li.page-item
-            a.page-link(href=`/pacientes/listado?page=${currentPage - 1}${query ? '&q=' + query : ''}`) « Anterior
+            a.page-link(href=`/pacientes/listado?page=${currentPage - 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) « Anterior
         else
           li.page-item.disabled
             span.page-link « Anterior
@@ -68,11 +73,11 @@ block content
               span.page-link #{page}
           else
             li.page-item
-              a.page-link(href=`/pacientes/listado?page=${page}${query ? '&q=' + query : ''}`) #{page}
+              a.page-link(href=`/pacientes/listado?page=${page}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) #{page}
 
         if currentPage < totalPages
           li.page-item
-            a.page-link(href=`/pacientes/listado?page=${currentPage + 1}${query ? '&q=' + query : ''}`) Siguiente »
+            a.page-link(href=`/pacientes/listado?page=${currentPage + 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) Siguiente »
         else
           li.page-item.disabled
             span.page-link Siguiente »
