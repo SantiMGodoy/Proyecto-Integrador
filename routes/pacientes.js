@@ -9,5 +9,7 @@ router.get('/listado', pacienteController.listarPacientes);
 router.get('/editar/:id', pacienteController.mostrarFormularioEditar);
 router.post('/editar/:id', pacienteController.editarPaciente);
 router.post('/eliminar/:id', pacienteController.eliminarPaciente);
+router.get('/emergencia', pacienteController.mostrarFormularioEmergencia);
+router.post('/emergencia', pacienteController.ingresoEmergencia);
 
 module.exports = router;

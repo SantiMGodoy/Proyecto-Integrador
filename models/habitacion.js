@@ -3,7 +3,6 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Habitacion extends Model {
     static associate(models) {
-      // Relaciones aquí dentro
       Habitacion.belongsTo(models.Ala, { foreignKey: 'AlaId' });
       Habitacion.hasMany(models.Cama, { foreignKey: 'HabitacionId' });
     }
@@ -12,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
   Habitacion.init({
     numero: DataTypes.STRING,
     cantidadCamas: DataTypes.INTEGER,
+    tipo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'consulta'
+    },
     AlaId: DataTypes.INTEGER
   }, {
     sequelize,

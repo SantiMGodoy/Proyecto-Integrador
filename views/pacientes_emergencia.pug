@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  .text-center.mb-4
+    h2.text-primary Registro de Paciente de Emergencia
+    p.text-muted Ingrese los datos básicos para registrar rápidamente al paciente.
+
+  form(method="POST" action="/pacientes/emergencia")
+    .mb-3
+      label.form-label(for="sexo") Sexo del paciente
+      select.form-select(name="sexo" required)
+        option(value="Masculino") Masculino
+        option(value="Femenino") Femenino
+        option(value="Otro") Otro
+
+    .mb-3
+      label.form-label(for="motivo") Motivo de ingreso
+      input.form-control(type="text", name="motivo", placeholder="Ej: accidente, paro cardíaco...", required)
+
+    .mb-3
+      label.form-label(for="camaId") Cama disponible
+      select.form-select(name="camaId" required)
+        each cama in camas
+          option(value=cama.id)= `Cama ${cama.numero} - Habitación ${cama.Habitacion.numero} (${cama.Habitacion.Ala.nombre})`
+
+    button.btn.btn-danger.mt-3(type="submit") Registrar paciente de emergencia
+    a.btn.btn-secondary.mt-3.ms-2(href="/") Cancelar

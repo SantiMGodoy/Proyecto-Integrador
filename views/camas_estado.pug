@@ -18,7 +18,7 @@ block content
 
     each habitacionNum in [...new Set(habitaciones.map(c => c.Habitacion.numero))]
       - const camasHabitacion = habitaciones.filter(c => c.Habitacion.numero === habitacionNum)
-      h5.mt-3.text-secondary Habitación #{habitacionNum}
+      h5.mt-3.text-secondary Habitación #{habitacionNum} - #{camasHabitacion[0].Habitacion.tipo || 'No especificado'}
 
       table.table.table-bordered.table-sm
         thead

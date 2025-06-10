@@ -8,7 +8,6 @@ block content
       .col-md-6
         label.form-label(for="nombre") Nombre
         input.form-control(type="text" name="nombre" value=paciente.nombre required)
-
       .col-md-6
         label.form-label(for="dni") DNI
         input.form-control(type="number" name="dni" value=paciente.dni required)
@@ -17,7 +16,6 @@ block content
       .col-md-6
         label.form-label(for="fechaNacimiento") Fecha de nacimiento
         input.form-control(type="date" name="fechaNacimiento" value=paciente.fechaNacimiento.toISOString().split('T')[0] required)
-
       .col-md-6
         label.form-label(for="sexo") Sexo
         select.form-select(name="sexo" required)
@@ -29,7 +27,6 @@ block content
       .col-md-6
         label.form-label(for="telefono") Teléfono
         input.form-control(type="text" name="telefono" value=paciente.telefono)
-
       .col-md-6
         label.form-label(for="direccion") Dirección
         input.form-control(type="text" name="direccion" value=paciente.direccion)
@@ -38,7 +35,11 @@ block content
       .col-md-6
         label.form-label(for="obraSocial") Obra Social
         input.form-control(type="text" name="obraSocial" value=paciente.obraSocial)
+      .col-md-6
+        label.form-label(for="motivoIngreso") Motivo del ingreso
+        input.form-control(type="text" name="motivoIngreso" value=paciente.motivoIngreso)
 
+    .row.mb-3
       .col-md-6
         label.form-label(for="viaIngreso") Vía de ingreso
         select.form-select(name="viaIngreso" id="viaIngreso" required onchange="toggleMedico()")
@@ -46,14 +47,13 @@ block content
           option(value="programada" selected=paciente.viaIngreso === 'programada') Cita programada
           option(value="derivacion" selected=paciente.viaIngreso === 'derivacion') Derivación médica
           option(value="emergencia" selected=paciente.viaIngreso === 'emergencia') Emergencia
-
-    .row.mb-3
       .col-md-6
         label.form-label(for="medicoDerivante") Médico derivante (si aplica)
         input.form-control(type="text" name="medicoDerivante" id="medicoDerivante" value=paciente.medicoDerivante)
 
-    .text-center
+    .text-center.mt-4
       button.btn.btn-primary.btn-lg(type="submit") Guardar cambios
+      a.btn.btn-outline-secondary.ms-2(href="/") ⬅️ Volver al inicio
 
   script.
     function toggleMedico() {
@@ -67,5 +67,3 @@ block content
       }
     }
     window.addEventListener('DOMContentLoaded', toggleMedico);
-
-  a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio

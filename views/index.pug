@@ -5,7 +5,7 @@ block content
     i.bi.bi-clipboard2-pulse-fill.display-1.text-primary
     h1.display-5.mt-3 Bienvenido al Sistema
 
-  .row.row-cols-1.row-cols-md-3.g-4
+  .row.row-cols-1.row-cols-md-4.g-4
     .col
       .card.h-100.shadow-sm.border-0.bg-light
         .card-body.text-center
@@ -29,3 +29,11 @@ block content
           h5.card-title.fs-4 Habitaciones
           p.card-text.text-muted Consultá la disponibilidad y estado de las camas.
           a.btn.btn-outline-info.mt-2(href="/internacion/camas") Ver habitaciones
+
+    .col
+      .card.h-100.shadow-sm.border-0.bg-light
+        .card-body.text-center
+          i.bi.bi-exclamation-triangle-fill.display-3.text-danger.mb-3
+          h5.card-title.fs-4 Emergencia
+          p.card-text.text-muted Registrar ingreso urgente con cama asignada automáticamente.
+          a.btn.btn-danger.mt-2(href="/pacientes/emergencia") Ingreso urgente

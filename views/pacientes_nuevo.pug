@@ -8,7 +8,6 @@ block content
       .col-md-6
         label.form-label(for="nombre") Nombre
         input.form-control(type="text" name="nombre" required)
-
       .col-md-6
         label.form-label(for="dni") DNI
         input.form-control(type="number" name="dni" required)
@@ -17,7 +16,6 @@ block content
       .col-md-6
         label.form-label(for="fechaNacimiento") Fecha de nacimiento
         input.form-control(type="date" name="fechaNacimiento" required)
-
       .col-md-6
         label.form-label(for="sexo") Sexo
         select.form-select(name="sexo" required)
@@ -30,15 +28,17 @@ block content
       .col-md-6
         label.form-label(for="telefono") Teléfono
         input.form-control(type="text" name="telefono")
-
       .col-md-6
         label.form-label(for="direccion") Dirección
         input.form-control(type="text" name="direccion")
 
     .row.mb-3
-      .col-md-12
+      .col-md-6
         label.form-label(for="obraSocial") Obra Social
         input.form-control(type="text" name="obraSocial")
+      .col-md-6
+        label.form-label(for="motivoIngreso") Motivo del ingreso
+        input.form-control(type="text" name="motivoIngreso" placeholder="Ej: Control, dolor abdominal...")
 
     .row.mb-3
       .col-md-6
@@ -48,13 +48,13 @@ block content
           option(value="programada") Cita programada
           option(value="derivacion") Derivación médica
           option(value="emergencia") Emergencia
-
       .col-md-6
         label.form-label(for="medicoDerivante") Médico derivante
         input.form-control(type="text" name="medicoDerivante" id="medicoDerivante")
 
-    .text-center
+    .text-center.mt-4
       button.btn.btn-primary.btn-lg(type="submit") Registrar Paciente
+      a.btn.btn-outline-secondary.ms-2(href="/") ⬅️ Volver al inicio
 
   script.
     function toggleMedico() {

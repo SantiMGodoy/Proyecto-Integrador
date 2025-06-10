@@ -25,6 +25,7 @@ block content
           th Fecha de Nacimiento
           th Sexo
           th Obra Social
+          th Motivo
           th Internación
           th Vía de ingreso
           th Acciones
@@ -37,12 +38,14 @@ block content
             td #{paciente.fechaNacimiento.toISOString().split('T')[0]}
             td #{paciente.sexo}
             td #{paciente.obraSocial}
+            td #{paciente.motivoIngreso || '-'}
             td
               - const activa = paciente.Internacions.find(i => i.estado === 'activa');
               if activa
                 p.mb-0 Cama: #{activa.Cama.numero}
                 p.mb-0 Habitación: #{activa.Cama.Habitacion.numero}
                 p.mb-0 Ala: #{activa.Cama.Habitacion.Ala.nombre}
+                p.mb-0 Tipo: #{activa.Cama.Habitacion.tipo}
                 p.mb-0 Ingreso: #{activa.fechaIngreso.toISOString().split('T')[0]}
               else
                 span.text-muted No internado
