@@ -67,27 +67,8 @@ const listarPacientes = async (req, res) => {
       };
     }
 
-    const include = [];
-
-    if (filtro) {
-      include.push({
-        model: Internacion,
-        required: filtro === 'internados',
-        where: filtro === 'internados'
-          ? { estado: 'activa' }
-          : filtro === 'no_internados'
-          ? { [Op.or]: [{ estado: { [Op.ne]: 'activa' } }, { estado: null }] }
-          : {},
-        include: {
-          model: Cama,
-          include: {
-            model: Habitacion,
-            include: Ala
-          }
-        }
-      });
-    } else {
-      include.push({
+    const include = [
+      {
         model: Internacion,
         required: false,
         include: {
@@ -97,21 +78,36 @@ const listarPacientes = async (req, res) => {
             include: Ala
           }
         }
-      });
-    }
+      }
+    ];
 
-    const pacientes = await Paciente.findAndCountAll({
+    // Aplicar filtrado por internación desde el lado de JS
+    const result = await Paciente.findAndCountAll({
       where: whereClause,
+      include,
       limit,
-      offset,
-      include
+      offset
     });
 
+    let pacientesFiltrados = result.rows;
+
+    if (filtro === 'internados') {
+      pacientesFiltrados = pacientesFiltrados.filter(p =>
+        p.Internacions.some(i => i.estado === 'activa')
+      );
+    }
+
+    if (filtro === 'no_internados') {
+      pacientesFiltrados = pacientesFiltrados.filter(p =>
+        p.Internacions.every(i => i.estado !== 'activa') || p.Internacions.length === 0
+      );
+    }
+
     res.render('pacientes_listado', {
-      pacientes: pacientes.rows,
-      total: pacientes.count,
+      pacientes: pacientesFiltrados,
+      total: pacientesFiltrados.length,
       currentPage: page,
-      totalPages: Math.ceil(pacientes.count / limit),
+      totalPages: Math.ceil(result.count / limit),
       query: q,
       filtro
     });
@@ -123,6 +119,7 @@ const listarPacientes = async (req, res) => {
     });
   }
 };
+
 
 const mostrarFormularioEditar = async (req, res) => {
   const paciente = await Paciente.findByPk(req.params.id);

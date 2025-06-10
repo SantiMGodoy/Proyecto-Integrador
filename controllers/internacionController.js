@@ -20,31 +20,50 @@ const mostrarFormularioAsignacion = async (req, res) => {
       });
     }
 
-    const camasDisponibles = await Cama.findAll({
-      where: { estado: 'libre', higienizada: true },
-      include: [{ model: Habitacion, include: [Cama, Ala] }]
+    const camas = await Cama.findAll({
+      include: {
+        model: Habitacion,
+        include: [Ala]
+      },
+      order: [['HabitacionId', 'ASC'], ['numero', 'ASC']]
     });
 
-    const camasFiltradas = [];
+    const internaciones = await Internacion.findAll({
+      where: { estado: 'activa' },
+      include: [Paciente, Cama]
+    });
 
-    for (let cama of camasDisponibles) {
+    const camaOcupacion = {};
+    internaciones.forEach(internacion => {
+      camaOcupacion[internacion.CamaId] = internacion.Paciente;
+    });
+
+    const camasCompatibles = camas.filter(cama => {
+      if (cama.estado !== 'libre' || !cama.higienizada) return false;
+
       const habitacion = cama.Habitacion;
-      const camasOcupadas = habitacion.Camas.filter(c => c.estado === 'ocupada');
+      const camasEnHabitacion = camas.filter(c => c.HabitacionId === habitacion.id);
+      const ocupadas = camasEnHabitacion.filter(c => c.estado === 'ocupada');
 
-      if (camasOcupadas.length === 0) {
-        camasFiltradas.push(cama);
-      } else if (
-        habitacion.cantidadCamas > 1 &&
-        camasOcupadas.every(c => c.sexoOcupante === paciente.sexo)
-      ) {
-        camasFiltradas.push(cama);
-      }
-    }
+      return (
+        ocupadas.length === 0 ||
+        (habitacion.cantidadCamas > 1 &&
+          ocupadas.every(c => c.sexoOcupante === paciente.sexo))
+      );
+    });
 
-    res.render('asignar_cama', { paciente, camas: camasFiltradas });
+    res.render('camas_estado', {
+      camas: camasCompatibles,
+      camaOcupacion,
+      mensaje: null,
+      paciente
+    });
   } catch (err) {
     console.error(err);
-    res.render('mensaje', { tipo: 'error', mensaje: 'Error al buscar camas disponibles' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al buscar camas disponibles'
+    });
   }
 };
 

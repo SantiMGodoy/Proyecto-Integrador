@@ -1,51 +1,71 @@
 extends layout
 
 block content
-  h2.text-center.mb-4 Estado de camas del hospital
+  if paciente
+    .alert.alert-info.text-center
+      h3 Asignar cama a: #{paciente.nombre}
+      p DNI: #{paciente.dni}
+      p Sexo: #{paciente.sexo}
 
   if mensaje
     .alert.alert-success.text-center #{mensaje}
 
-  table.table.table-bordered.table-striped
-    thead
-      tr
-        th N°
-        th Estado
-        th Higienizada
-        th Ocupante
-        th Sexo Ocupante
-        th Habitación
-        th Ala
-        th Acción
-    tbody
-      each cama in camas
-        tr
-          td #{cama.numero}
-          td
-            if cama.estado === 'ocupada'
-              span.text-danger Ocupada
-            else
-              span.text-success Libre
-          td
-            if cama.higienizada
-              span.text-success ✅
-            else
-              span.text-danger ❌
-          td
-            if cama.estado === 'ocupada' && camaOcupacion[cama.id]
-              = camaOcupacion[cama.id].nombre
-            else
-              i.text-muted No asignado
-          td #{cama.sexoOcupante || '-'}
-          td #{cama.Habitacion.numero}
-          td #{cama.Habitacion.Ala.nombre}
-          td
-            if !cama.higienizada && cama.estado === 'libre'
-              form(action=`/internacion/cama/higienizar/${cama.id}` method="POST")
-                button.btn.btn-sm.btn-outline-success(type="submit") Higienizar
-            else if cama.higienizada
-              span.text-muted Limpia
-            else
-              span.text-muted No disponible
+  h2.text-center.mb-4 Estado general de camas del hospital
 
+  each ala in [...new Set(camas.map(c => c.Habitacion.Ala.nombre))]
+    - const habitaciones = camas.filter(c => c.Habitacion.Ala.nombre === ala)
+    h3.mt-4.text-primary Ala: #{ala}
+
+    each habitacionNum in [...new Set(habitaciones.map(c => c.Habitacion.numero))]
+      - const camasHabitacion = habitaciones.filter(c => c.Habitacion.numero === habitacionNum)
+      h5.mt-3.text-secondary Habitación #{habitacionNum}
+
+      table.table.table-bordered.table-sm
+        thead
+          tr
+            th N° Cama
+            th Estado
+            th Higienizada
+            th Ocupante
+            th Sexo Ocupante
+            th Acción
+        tbody
+          each cama in camasHabitacion
+            - const ocupante = camaOcupacion[cama.id]
+            - const esOcupada = cama.estado === 'ocupada'
+            - const esHigienizada = cama.higienizada
+            - const claseFila = esOcupada ? 'table-danger' : (esHigienizada ? 'table-success' : 'table-warning')
+            tr(class=claseFila)
+              td #{cama.numero}
+              td
+                if esOcupada
+                  span.text-danger Ocupada
+                else
+                  span.text-success Libre
+              td
+                if esHigienizada
+                  span.text-success ✅
+                else
+                  span.text-danger ❌
+              td
+                if esOcupada && ocupante
+                  = ocupante.nombre
+                else
+                  i.text-muted No asignado
+              td #{cama.sexoOcupante || '-'}
+              td
+                if paciente
+                  if cama.estado === 'libre' && cama.higienizada
+                    form(method="POST", action=`/internacion/asignar/${paciente.id}`)
+                      input(type="hidden", name="camaId", value=cama.id)
+                      button.btn.btn-sm.btn-outline-primary(type="submit") Asignar
+                  else
+                    span.text-muted No disponible
+                else
+                  if !esHigienizada && cama.estado === 'libre'
+                    form(method="POST", action=`/internacion/cama/higienizar/${cama.id}`)
+                      button.btn.btn-sm.btn-outline-success(type="submit") Higienizar
+                  else
+                    span.text-muted -
+  
   a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio

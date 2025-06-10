@@ -3,7 +3,7 @@ extends layout
 block content
   h2.text-center.mb-4 Lista de pacientes
 
-  form.mb-4(method="GET" action="/pacientes")
+  form.mb-4(method="GET" action="/pacientes/listado")
     .row.mb-2
       .col-md-4
         .input-group
@@ -62,7 +62,7 @@ block content
       ul.pagination.justify-content-center
         if currentPage > 1
           li.page-item
-            a.page-link(href=`/pacientes/?page=${currentPage - 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) « Anterior
+            a.page-link(href=`/pacientes/listado?page=${currentPage - 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) « Anterior
         else
           li.page-item.disabled
             span.page-link « Anterior

@@ -1,48 +1,31 @@
 extends layout
 
 block content
-  .text-center
-    h1 Sistema de Admisión Hospitalaria
-    p.lead Bienvenido al módulo de internación HIS.
+  .text-center.mb-5
+    i.bi.bi-clipboard2-pulse-fill.display-1.text-primary
+    h1.display-5.mt-3 Bienvenido al Sistema
 
-    if totalInternados > 0
-      .alert.alert-info.mt-3
-        | 👥 Hay actualmente 
-        b #{totalInternados} 
-        | pacientes internados activos.
-    else
-      .alert.alert-warning.mt-3
-        | No hay pacientes internados en este momento.
+  .row.row-cols-1.row-cols-md-3.g-4
+    .col
+      .card.h-100.shadow-sm.border-0.bg-light
+        .card-body.text-center
+          i.bi.bi-person-plus.display-3.text-primary.mb-3
+          h5.card-title.fs-4 Registro de paciente
+          p.card-text.text-muted Registro de nuevos pacientes.
+          a.btn.btn-primary.mt-2(href="/pacientes/nuevo") Registrar paciente
 
-  .card.mt-4.mb-5
-    .card-body
-      h5.card-title.text-primary ℹ️ ¿Cómo usar el sistema?
-      ol
-        li Registrar un nuevo paciente desde el botón correspondiente.
-        li Asignarle una cama disponible (se asigna por compatibilidad).
-        li Completar la evaluación de enfermería y médica.
-        li Consultar el resumen del paciente.
-        li Dar de alta al paciente cuando corresponda.
+    .col
+      .card.h-100.shadow-sm.border-0.bg-light
+        .card-body.text-center
+          i.bi.bi-people-fill.display-3.text-dark.mb-3
+          h5.card-title.fs-4 Listado de pacientes
+          p.card-text.text-muted Consultá, editá o gestioná pacientes existentes.
+          a.btn.btn-dark.mt-2(href="/pacientes/listado") Ver pacientes
 
-  .row.text-center
-    .col-md-4
-      .card.shadow-sm
-        .card-body
-          h5.card-title ➕ Registrar Paciente
-          p.card-text Alta de un nuevo paciente al sistema.
-          a.btn.btn-primary.btn-lg(href="/pacientes/nuevo") Ir al formulario
-
-  .row.text-center.mt-4
-    .col-md-4
-      .card.shadow-sm
-        .card-body
-          h5.card-title 📋 Ver todos los pacientes
-          p.card-text Lista completa de todos los pacientes registrados.
-          a.btn.btn-dark(href="/pacientes/listado") Ver pacientes
-
-    .col-md-4
-      .card.shadow-sm
-        .card-body
-          h5.card-title 🛏️ Estado de camas
-          p.card-text Visualizar camas ocupadas, libres e higienizadas
-          a.btn.btn-outline-info(href="/internacion/camas") Ver camas
+    .col
+      .card.h-100.shadow-sm.border-0.bg-light
+        .card-body.text-center
+          i.bi.bi-hospital.display-3.text-info.mb-3
+          h5.card-title.fs-4 Habitaciones
+          p.card-text.text-muted Consultá la disponibilidad y estado de las camas.
+          a.btn.btn-outline-info.mt-2(href="/internacion/camas") Ver habitaciones
