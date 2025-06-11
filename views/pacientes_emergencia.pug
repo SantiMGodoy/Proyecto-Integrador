@@ -21,7 +21,7 @@ block content
       label.form-label(for="camaId") Cama disponible
       select.form-select(name="camaId" required)
         each cama in camas
-          option(value=cama.id)= `Cama ${cama.numero} - Habitación ${cama.Habitacion.numero} (${cama.Habitacion.Ala.nombre})`
+          option(value=cama.id)= `Cama ${cama.numero} - Habitación ${cama.Habitacion.numero} - ${cama.Habitacion.tipo} (${cama.Habitacion.Ala.nombre})`
 
     button.btn.btn-danger.mt-3(type="submit") Registrar paciente de emergencia
     a.btn.btn-secondary.mt-3.ms-2(href="/") Cancelar

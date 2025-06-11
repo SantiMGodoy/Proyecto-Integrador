@@ -14,7 +14,7 @@ block content
 
   each ala in [...new Set(camas.map(c => c.Habitacion.Ala.nombre))]
     - const habitaciones = camas.filter(c => c.Habitacion.Ala.nombre === ala)
-    h3.mt-4.text-primary Ala: #{ala}
+    h3.mt-4.text-primary #{ala}
 
     each habitacionNum in [...new Set(habitaciones.map(c => c.Habitacion.numero))]
       - const camasHabitacion = habitaciones.filter(c => c.Habitacion.numero === habitacionNum)

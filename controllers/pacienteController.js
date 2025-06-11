@@ -81,30 +81,32 @@ const listarPacientes = async (req, res) => {
       }
     ];
 
+    if (filtro === 'internados') {
+      include[0].where = { estado: 'activa' };
+      include[0].required = true;
+    } else if (filtro === 'no_internados') {
+      const internados = await Internacion.findAll({
+        where: { estado: 'activa' },
+        attributes: ['PacienteId']
+      });
+
+      const idsInternados = internados.map(i => i.PacienteId);
+      if (idsInternados.length > 0) {
+        whereClause.id = { [Op.notIn]: idsInternados };
+      }
+    }
+
     const result = await Paciente.findAndCountAll({
       where: whereClause,
       include,
       limit,
-      offset
+      offset,
+      distinct: true
     });
 
-    let pacientesFiltrados = result.rows;
-
-    if (filtro === 'internados') {
-      pacientesFiltrados = pacientesFiltrados.filter(p =>
-        p.Internacions.some(i => i.estado === 'activa')
-      );
-    }
-
-    if (filtro === 'no_internados') {
-      pacientesFiltrados = pacientesFiltrados.filter(p =>
-        p.Internacions.every(i => i.estado !== 'activa') || p.Internacions.length === 0
-      );
-    }
-
     res.render('pacientes_listado', {
-      pacientes: pacientesFiltrados,
-      total: pacientesFiltrados.length,
+      pacientes: result.rows,
+      total: result.count,
       currentPage: page,
       totalPages: Math.ceil(result.count / limit),
       query: q,

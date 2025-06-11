@@ -46,7 +46,7 @@ block content
           option(value="") Seleccionar...
           option(value="programada" selected=paciente.viaIngreso === 'programada') Cita programada
           option(value="derivacion" selected=paciente.viaIngreso === 'derivacion') Derivación médica
-          option(value="emergencia" selected=paciente.viaIngreso === 'emergencia') Emergencia
+          option(value="emergencia" selected=paciente.viaIngreso === 'emergencia') Consulta
       .col-md-6
         label.form-label(for="medicoDerivante") Médico derivante (si aplica)
         input.form-control(type="text" name="medicoDerivante" id="medicoDerivante" value=paciente.medicoDerivante)
