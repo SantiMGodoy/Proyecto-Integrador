@@ -83,7 +83,10 @@ const asignarCama = async (req, res) => {
     }
 
     const cama = await Cama.findByPk(camaId, {
-      include: { model: Habitacion, include: [Cama] }
+      include: {
+        model: Habitacion,
+        include: [Cama]
+      }
     });
 
     if (!paciente || !cama || cama.estado !== 'libre' || !cama.higienizada) {
@@ -111,12 +114,14 @@ const asignarCama = async (req, res) => {
       sexoOcupante: paciente.sexo
     });
 
-    await Internacion.create({
-      PacienteId: paciente.id,
-      CamaId: cama.id,
-      fechaIngreso: new Date(),
-      estado: 'activa'
-    });
+    if (habitacion.requiereInternacion) {
+      await Internacion.create({
+        PacienteId: paciente.id,
+        CamaId: cama.id,
+        fechaIngreso: new Date(),
+        estado: 'activa'
+      });
+    }
 
     res.render('mensaje', {
       tipo: 'exito',
@@ -125,9 +130,13 @@ const asignarCama = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.render('mensaje', { tipo: 'error', mensaje: 'Error al asignar cama' });
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al asignar cama'
+    });
   }
 };
+
 
 const cancelarAdmision = async (req, res) => {
   try {

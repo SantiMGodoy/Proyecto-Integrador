@@ -27,6 +27,7 @@ block content
           th Obra Social
           th Motivo
           th Internación
+          th Internado
           th Vía de ingreso
           th Acciones
       tbody
@@ -39,6 +40,7 @@ block content
             td #{paciente.sexo}
             td #{paciente.obraSocial}
             td #{paciente.motivoIngreso || '-'}
+
             td
               - const activa = paciente.Internacions.find(i => i.estado === 'activa');
               if activa
@@ -49,12 +51,20 @@ block content
                 p.mb-0 Ingreso: #{activa.fechaIngreso.toISOString().split('T')[0]}
               else
                 span.text-muted No internado
+
+            td
+              if activa && activa.Cama.Habitacion.requiereInternacion
+                span.text-success Sí
+              else
+                span.text-muted No
+
             td
               - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
               | #{via}
               if paciente.medicoDerivante
                 br
                 small.text-muted #{paciente.medicoDerivante}
+
             td
               a.btn.btn-sm.btn-outline-secondary(href=`/pacientes/opciones?id=${paciente.id}`) ⚙ Gestionar
               a.btn.btn-sm.btn-outline-warning.ms-1(href=`/pacientes/editar/${paciente.id}`) ✏️ Editar

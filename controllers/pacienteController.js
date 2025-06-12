@@ -71,6 +71,7 @@ const listarPacientes = async (req, res) => {
       {
         model: Internacion,
         required: false,
+        where: { estado: 'activa' },
         include: {
           model: Cama,
           include: {
@@ -81,21 +82,6 @@ const listarPacientes = async (req, res) => {
       }
     ];
 
-    if (filtro === 'internados') {
-      include[0].where = { estado: 'activa' };
-      include[0].required = true;
-    } else if (filtro === 'no_internados') {
-      const internados = await Internacion.findAll({
-        where: { estado: 'activa' },
-        attributes: ['PacienteId']
-      });
-
-      const idsInternados = internados.map(i => i.PacienteId);
-      if (idsInternados.length > 0) {
-        whereClause.id = { [Op.notIn]: idsInternados };
-      }
-    }
-
     const result = await Paciente.findAndCountAll({
       where: whereClause,
       include,
@@ -104,9 +90,18 @@ const listarPacientes = async (req, res) => {
       distinct: true
     });
 
+    const pacientesFiltrados = result.rows.filter(paciente => {
+      const internacion = paciente.Internacions.find(i => i.estado === 'activa');
+      const requiere = internacion?.Cama?.Habitacion?.requiereInternacion === true;
+
+      if (filtro === 'internados') return !!internacion && requiere;
+      if (filtro === 'no_internados') return !internacion || !requiere;
+      return true;
+    });
+
     res.render('pacientes_listado', {
-      pacientes: result.rows,
-      total: result.count,
+      pacientes: pacientesFiltrados,
+      total: pacientesFiltrados.length,
       currentPage: page,
       totalPages: Math.ceil(result.count / limit),
       query: q,
@@ -120,6 +115,9 @@ const listarPacientes = async (req, res) => {
     });
   }
 };
+
+
+
 
 
 const mostrarFormularioEditar = async (req, res) => {

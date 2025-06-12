@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'consulta'
     },
+    requiereInternacion: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
     AlaId: DataTypes.INTEGER
   }, {
     sequelize,
