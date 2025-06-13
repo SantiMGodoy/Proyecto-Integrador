@@ -7,7 +7,7 @@ const mostrarFormulario = (req, res) => {
 
 const registrarPaciente = async (req, res) => {
   try {
-    const { nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso  } = req.body;
+    const { nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso } = req.body;
 
     if (viaIngreso === 'derivacion' && (!medicoDerivante || medicoDerivante.trim() === '')) {
       return res.render('mensaje', {
@@ -20,10 +20,10 @@ const registrarPaciente = async (req, res) => {
 
     let mensaje;
     if (paciente) {
-      await paciente.update({ nombre, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso  });
+      await paciente.update({ nombre, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso });
       mensaje = 'Datos del paciente actualizados correctamente.';
     } else {
-      paciente = await Paciente.create({ nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso  });
+      paciente = await Paciente.create({ nombre, dni, fechaNacimiento, sexo, telefono, direccion, obraSocial, viaIngreso, medicoDerivante, motivoIngreso });
       mensaje = 'Paciente registrado correctamente.';
     }
 
@@ -90,17 +90,47 @@ const listarPacientes = async (req, res) => {
       distinct: true
     });
 
+    const camasOcupadas = await Cama.findAll({
+      where: { estado: 'ocupada', PacienteId: { [Op.ne]: null } },
+      include: [
+        { model: Habitacion, include: [Ala] },
+        { model: Paciente }
+      ]
+    });
+
+    const camaAsignaciones = {};
+    for (const cama of camasOcupadas) {
+      camaAsignaciones[cama.PacienteId] = {
+        numero: cama.numero,
+        habitacion: cama.Habitacion.numero,
+        ala: cama.Habitacion.Ala.nombre,
+        tipo: cama.Habitacion.tipo
+      };
+    }
+
+    for (const paciente of result.rows) {
+      const internacion = paciente.Internacions.find(i => i.estado === 'activa');
+      if (internacion) {
+        camaAsignaciones[paciente.id] = {
+          numero: internacion.Cama.numero,
+          habitacion: internacion.Cama.Habitacion.numero,
+          ala: internacion.Cama.Habitacion.Ala.nombre,
+          tipo: internacion.Cama.Habitacion.tipo
+        };
+      }
+    }
+
     const pacientesFiltrados = result.rows.filter(paciente => {
       const internacion = paciente.Internacions.find(i => i.estado === 'activa');
-      const requiere = internacion?.Cama?.Habitacion?.requiereInternacion === true;
 
-      if (filtro === 'internados') return !!internacion && requiere;
-      if (filtro === 'no_internados') return !internacion || !requiere;
+      if (filtro === 'internados') return !!internacion;
+      if (filtro === 'no_internados') return !internacion;
       return true;
     });
 
     res.render('pacientes_listado', {
       pacientes: pacientesFiltrados,
+      camaAsignaciones,
       total: pacientesFiltrados.length,
       currentPage: page,
       totalPages: Math.ceil(result.count / limit),
@@ -115,10 +145,6 @@ const listarPacientes = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const mostrarFormularioEditar = async (req, res) => {
   const paciente = await Paciente.findByPk(req.params.id);
@@ -173,7 +199,6 @@ const eliminarPaciente = async (req, res) => {
   }
 };
 
-
 const mostrarFormularioEmergencia = async (req, res) => {
   try {
     const camas = await Cama.findAll({
@@ -211,7 +236,7 @@ const ingresoEmergencia = async (req, res) => {
     }
 
     const nombre = `Emergencia ${cama.Habitacion.Ala.nombre}`;
-    const dni = cama.Habitacion.numero;
+    const dni = `Emerg-${cama.Habitacion.numero}-${Date.now()}`;
 
     const paciente = await Paciente.create({
       nombre,
@@ -226,21 +251,36 @@ const ingresoEmergencia = async (req, res) => {
       motivoIngreso: motivo
     });
 
+    const camaAsignada = await Cama.findOne({
+      where: { PacienteId: paciente.id, estado: 'ocupada' }
+    });
+    if (camaAsignada) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'El paciente ya tiene una cama asignada.'
+      });
+    }
+
     await cama.update({
       estado: 'ocupada',
-      sexoOcupante: sexo
+      sexoOcupante: sexo,
+      PacienteId: paciente.id
     });
 
-    await Internacion.create({
-      PacienteId: paciente.id,
-      CamaId: cama.id,
-      fechaIngreso: new Date(),
-      estado: 'activa'
-    });
+    let mensaje = `Paciente de emergencia asignado a la cama ${cama.numero}`;
+    if (cama.Habitacion.requiereInternacion) {
+      await Internacion.create({
+        PacienteId: paciente.id,
+        CamaId: cama.id,
+        fechaIngreso: new Date(),
+        estado: 'activa'
+      });
+      mensaje += ' e internación realizada';
+    }
 
     res.render('mensaje', {
       tipo: 'exito',
-      mensaje: `Paciente de emergencia asignado a la cama ${cama.numero}`,
+      mensaje,
       resumenId: paciente.id
     });
   } catch (err) {
@@ -248,8 +288,6 @@ const ingresoEmergencia = async (req, res) => {
     res.render('mensaje', { tipo: 'error', mensaje: 'Error al registrar paciente de emergencia' });
   }
 };
-
-
 
 module.exports = {
   mostrarFormulario,
@@ -261,5 +299,4 @@ module.exports = {
   eliminarPaciente,
   mostrarFormularioEmergencia,
   ingresoEmergencia
-
 };

@@ -1,4 +1,5 @@
 const { Paciente, Cama, Habitacion, Ala, Internacion } = require('../models');
+const { Op } = require('sequelize');
 
 const mostrarFormularioAsignacion = async (req, res) => {
   try {
@@ -13,10 +14,14 @@ const mostrarFormularioAsignacion = async (req, res) => {
     const yaInternado = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' }
     });
-    if (yaInternado) {
+    const camaAsignada = await Cama.findOne({
+      where: { PacienteId: paciente.id, estado: 'ocupada' }
+    });
+
+    if (yaInternado || camaAsignada) {
       return res.render('mensaje', {
         tipo: 'error',
-        mensaje: 'El paciente ya tiene una internación activa.'
+        mensaje: 'El paciente ya tiene una cama asignada.'
       });
     }
 
@@ -72,10 +77,21 @@ const asignarCama = async (req, res) => {
     const { camaId } = req.body;
     const paciente = await Paciente.findByPk(req.params.pacienteId);
 
+    if (!paciente) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Paciente no encontrado'
+      });
+    }
+
     const yaInternado = await Internacion.findOne({
       where: { PacienteId: paciente.id, estado: 'activa' }
     });
-    if (yaInternado) {
+    const camaAsignada = await Cama.findOne({
+      where: { PacienteId: paciente.id, estado: 'ocupada' }
+    });
+
+    if (yaInternado || camaAsignada) {
       return res.render('mensaje', {
         tipo: 'error',
         mensaje: 'El paciente ya tiene una cama asignada.'
@@ -89,7 +105,7 @@ const asignarCama = async (req, res) => {
       }
     });
 
-    if (!paciente || !cama || cama.estado !== 'libre' || !cama.higienizada) {
+    if (!cama || cama.estado !== 'libre' || !cama.higienizada) {
       return res.render('mensaje', {
         tipo: 'error',
         mensaje: 'Cama no disponible para asignar'
@@ -111,7 +127,8 @@ const asignarCama = async (req, res) => {
 
     await cama.update({
       estado: 'ocupada',
-      sexoOcupante: paciente.sexo
+      sexoOcupante: paciente.sexo,
+      PacienteId: paciente.id
     });
 
     if (habitacion.requiereInternacion) {
@@ -125,7 +142,7 @@ const asignarCama = async (req, res) => {
 
     res.render('mensaje', {
       tipo: 'exito',
-      mensaje: 'Cama asignada correctamente',
+      mensaje: habitacion.requiereInternacion ? 'Cama asignada e internación realizada correctamente' : 'Cama asignada correctamente',
       resumenId: paciente.id
     });
   } catch (err) {
@@ -136,7 +153,6 @@ const asignarCama = async (req, res) => {
     });
   }
 };
-
 
 const cancelarAdmision = async (req, res) => {
   try {
@@ -155,6 +171,7 @@ const cancelarAdmision = async (req, res) => {
     await internacion.Cama.update({
       estado: 'libre',
       sexoOcupante: null,
+      PacienteId: null,
       higienizada: false
     });
 
@@ -191,6 +208,7 @@ const darDeAlta = async (req, res) => {
     await internacion.Cama.update({
       estado: 'libre',
       sexoOcupante: null,
+      PacienteId: null,
       higienizada: false
     });
 
@@ -235,6 +253,45 @@ const higienizarCama = async (req, res) => {
   }
 };
 
+const finalizarAsignacion = async (req, res) => {
+  try {
+    const cama = await Cama.findByPk(req.params.camaId, {
+      include: Habitacion
+    });
+    if (!cama || cama.estado !== 'ocupada') {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Cama no encontrada o no está ocupada'
+      });
+    }
+
+    if (cama.Habitacion.requiereInternacion) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Esta cama está asignada para internación. Use "Dar de alta" o "Cancelar admisión" para liberarla.'
+      });
+    }
+
+    await cama.update({
+      estado: 'libre',
+      sexoOcupante: null,
+      PacienteId: null,
+      higienizada: false
+    });
+
+    res.render('mensaje', {
+      tipo: 'exito',
+      mensaje: 'Asignación finalizada y cama liberada correctamente'
+    });
+  } catch (err) {
+    console.error(err);
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al finalizar asignación'
+    });
+  }
+};
+
 const mostrarEstadoCamas = async (req, res) => {
   try {
     const camas = await Cama.findAll({
@@ -251,8 +308,20 @@ const mostrarEstadoCamas = async (req, res) => {
     });
 
     const camaOcupacion = {};
+    const internacionesActivas = {};
     internaciones.forEach(internacion => {
       camaOcupacion[internacion.CamaId] = internacion.Paciente;
+      internacionesActivas[internacion.PacienteId] = internacion;
+    });
+
+    const camasOcupadas = await Cama.findAll({
+      where: { estado: 'ocupada', PacienteId: { [Op.ne]: null } },
+      include: [Paciente, { model: Habitacion, include: [Ala] }]
+    });
+    camasOcupadas.forEach(cama => {
+      if (!camaOcupacion[cama.id]) {
+        camaOcupacion[cama.id] = cama.Paciente;
+      }
     });
 
     const mensaje = req.query.msg === 'ok' ? 'Cama higienizada correctamente ✅' : null;
@@ -260,6 +329,7 @@ const mostrarEstadoCamas = async (req, res) => {
     res.render('camas_estado', {
       camas,
       camaOcupacion,
+      internacionesActivas,
       mensaje
     });
   } catch (err) {
@@ -274,5 +344,6 @@ module.exports = {
   cancelarAdmision,
   darDeAlta,
   higienizarCama,
+  finalizarAsignacion,
   mostrarEstadoCamas
 };

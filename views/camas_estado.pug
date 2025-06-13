@@ -28,6 +28,7 @@ block content
             th Higienizada
             th Ocupante
             th Sexo Ocupante
+            th Tipo Habitación
             th Acción
         tbody
           each cama in camasHabitacion
@@ -53,6 +54,7 @@ block content
                 else
                   i.text-muted No asignado
               td #{cama.sexoOcupante || '-'}
+              td #{cama.Habitacion.tipo || 'No especificado'}
               td
                 if paciente
                   if cama.estado === 'libre' && cama.higienizada
@@ -63,8 +65,14 @@ block content
                     span.text-muted No disponible
                 else
                   if !esHigienizada && cama.estado === 'libre'
-                    form(method="POST", action=`/internacion/cama/higienizar/${cama.id}`)
-                      button.btn.btn-sm.btn-outline-success(type="submit") Higienizar
+                    a.btn.btn-sm.btn-outline-success(href=`/internacion/higienizar/${cama.id}`) Higienizar
+                  else if esOcupada && !cama.Habitacion.requiereInternacion
+                    a.btn.btn-sm.btn-outline-warning(href=`/internacion/finalizar-asignacion/${cama.id}`) Finalizar
+                  else if esOcupada && cama.Habitacion.requiereInternacion && ocupante
+                    form.d-inline(method="POST", action=`/internacion/cancelar/${ocupante.id}`)
+                      button.btn.btn-sm.btn-outline-danger(type="submit") Cancelar Admisión
+                    form.d-inline.ms-2(method="POST", action=`/internacion/alta/${ocupante.id}`)
+                      button.btn.btn-sm.btn-outline-success(type="submit") Dar de Alta
                   else
                     span.text-muted -
   

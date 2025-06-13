@@ -1,13 +1,3 @@
-// 1. Ruta: routes/emergencia.js
-const express = require('express');
-const router = express.Router();
-const emergenciaController = require('../controllers/emergenciaController');
-
-router.get('/activar', emergenciaController.registroEmergencia);
-
-module.exports = router;
-
-// 2. Controlador: controllers/emergenciaController.js
 const { Paciente, Cama, Habitacion, Ala, Internacion } = require('../models');
 
 const registroEmergencia = async (req, res) => {
@@ -32,7 +22,7 @@ const registroEmergencia = async (req, res) => {
     const habitacion = cama.Habitacion;
 
     const nombre = `Emergencia - ${habitacion.Ala.nombre}`;
-    const dni = `${habitacion.numero}`;
+    const dni = `Emerg-${habitacion.numero}-${Date.now()}`; // DNI único
 
     let paciente = await Paciente.create({
       nombre,
@@ -42,21 +32,29 @@ const registroEmergencia = async (req, res) => {
       obraSocial: 'No determinada',
       direccion: 'Sin datos',
       telefono: '-',
-      motivo: 'Ingreso por emergencia automática'
+      motivoIngreso: 'Ingreso por emergencia automática'
     });
 
-    await cama.update({ estado: 'ocupada', sexoOcupante: 'X' });
-
-    await Internacion.create({
-      PacienteId: paciente.id,
-      CamaId: cama.id,
-      fechaIngreso: new Date(),
-      estado: 'activa'
+    await cama.update({
+      estado: 'ocupada',
+      sexoOcupante: 'X',
+      PacienteId: paciente.id
     });
+
+    let mensaje = 'Paciente registrado por emergencia y cama asignada correctamente.';
+    if (habitacion.tipo === 'cirugia') {
+      await Internacion.create({
+        PacienteId: paciente.id,
+        CamaId: cama.id,
+        fechaIngreso: new Date(),
+        estado: 'activa'
+      });
+      mensaje = 'Paciente registrado por emergencia, cama asignada e internación realizada correctamente.';
+    }
 
     res.render('mensaje', {
       tipo: 'exito',
-      mensaje: 'Paciente registrado por emergencia y cama asignada correctamente.',
+      mensaje,
       resumenId: paciente.id
     });
   } catch (error) {

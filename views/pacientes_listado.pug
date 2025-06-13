@@ -26,7 +26,7 @@ block content
           th Sexo
           th Obra Social
           th Motivo
-          th Internación
+          th Habitación
           th Internado
           th Vía de ingreso
           th Acciones
@@ -42,24 +42,24 @@ block content
             td #{paciente.motivoIngreso || '-'}
 
             td
-              - const activa = paciente.Internacions.find(i => i.estado === 'activa');
-              if activa
-                p.mb-0 Cama: #{activa.Cama.numero}
-                p.mb-0 Habitación: #{activa.Cama.Habitacion.numero}
-                p.mb-0 Ala: #{activa.Cama.Habitacion.Ala.nombre}
-                p.mb-0 Tipo: #{activa.Cama.Habitacion.tipo}
-                p.mb-0 Ingreso: #{activa.fechaIngreso.toISOString().split('T')[0]}
+              if camaAsignaciones[paciente.id]
+                p.mb-0 Cama: #{camaAsignaciones[paciente.id].numero}
+                p.mb-0 Habitación: #{camaAsignaciones[paciente.id].habitacion}
+                p.mb-0 Ala: #{camaAsignaciones[paciente.id].ala}
+                p.mb-0 Tipo: #{camaAsignaciones[paciente.id].tipo}
+                if paciente.Internacions.find(i => i.estado === 'activa')
+                  p.mb-0 Ingreso: #{paciente.Internacions.find(i => i.estado === 'activa').fechaIngreso.toISOString().split('T')[0]}
               else
-                span.text-muted No internado
+                span.text-muted Sin asignar
 
             td
-              if activa && activa.Cama.Habitacion.requiereInternacion
+              if paciente.Internacions.find(i => i.estado === 'activa')
                 span.text-success Sí
               else
                 span.text-muted No
 
             td
-              - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
+              - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica': paciente.viaIngreso === 'consulta' ? 'Consulta' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
               | #{via}
               if paciente.medicoDerivante
                 br
