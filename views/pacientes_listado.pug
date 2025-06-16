@@ -1,98 +1,93 @@
 extends layout
 
 block content
-  h2.text-center.mb-4 Lista de pacientes
+  .container
+    h2.text-center.mb-4.text-primary.fw-bold Lista de Pacientes
 
-  form.mb-4(method="GET" action="/pacientes/listado")
-    .row.mb-2
-      .col-md-4
-        .input-group
-          input.form-control(type="text" name="q" placeholder="Buscar por nombre o DNI" value=query)
-          button.btn.btn-outline-primary(type="submit") 🔍 Buscar
-      .col-md-4.offset-md-4
-        select.form-select(name="filtro" onchange="this.form.submit()")
-          option(value="" selected=(!filtro || filtro === '')) Todos los pacientes
-          option(value="internados" selected=(filtro==='internados')) Solo internados
-          option(value="no_internados" selected=(filtro==='no_internados')) No internados
+    form.mb-4(method="GET" action="/pacientes/listado")
+      .row.g-3.align-items-end
+        .col-md-6.col-lg-4
+          label.form-label(for="q") Buscar
+          .input-group
+            input#q.form-control(type="text" name="q" placeholder="Nombre o DNI" value=query)
+            button.btn.btn-outline-primary(type="submit" title="Buscar") 🔍
+        .col-md-6.col-lg-4.offset-lg-4
+          label.form-label(for="filtro") Filtro
+          select#filtro.form-select(name="filtro" onchange="this.form.submit()")
+            option(value="" selected=(!filtro || filtro === '')) Todos
+            option(value="internados" selected=(filtro==='internados')) Internados
+            option(value="no_internados" selected=(filtro==='no_internados')) No internados
 
-  if pacientes.length
-    table.table.table-striped.table-bordered
-      thead
-        tr
-          th ID
-          th Nombre
-          th DNI
-          th Fecha de Nacimiento
-          th Sexo
-          th Obra Social
-          th Motivo
-          th Habitación
-          th Internado
-          th Vía de ingreso
-          th Acciones
-      tbody
-        each paciente in pacientes
-          tr
-            td #{paciente.id}
-            td #{paciente.nombre}
-            td #{paciente.dni}
-            td #{paciente.fechaNacimiento.toISOString().split('T')[0]}
-            td #{paciente.sexo}
-            td #{paciente.obraSocial}
-            td #{paciente.motivoIngreso || '-'}
+    if pacientes.length
+      .table-responsive
+        table.table.table-hover.table-bordered.align-middle.shadow-sm
+          thead.bg-primary.text-white
+            tr.text-center
+              th ID
+              th Nombre
+              th DNI
+              th F. Nacimiento
+              th Sexo
+              th Obra Social
+              th Motivo Ingreso
+              th Habitación
+              th Internado
+              th Vía Ingreso
+              th Acciones
+          tbody
+            each paciente in pacientes
+              tr
+                td.text-center #{paciente.id}
+                td #{paciente.nombre}
+                td #{paciente.dni}
+                td.text-nowrap #{paciente.fechaNacimiento.toISOString().split('T')[0]}
+                td #{paciente.sexo}
+                td #{paciente.obraSocial}
+                td #{paciente.motivoIngreso || '-'}
 
-            td
-              if camaAsignaciones[paciente.id]
-                p.mb-0 Cama: #{camaAsignaciones[paciente.id].numero}
-                p.mb-0 Habitación: #{camaAsignaciones[paciente.id].habitacion}
-                p.mb-0 Ala: #{camaAsignaciones[paciente.id].ala}
-                p.mb-0 Tipo: #{camaAsignaciones[paciente.id].tipo}
-                if paciente.Internacions.find(i => i.estado === 'activa')
-                  p.mb-0 Ingreso: #{paciente.Internacions.find(i => i.estado === 'activa').fechaIngreso.toISOString().split('T')[0]}
-              else
-                span.text-muted Sin asignar
+                td
+                  if camaAsignaciones[paciente.id]
+                    ul.list-unstyled.mb-0.small
+                      li Cama: #{camaAsignaciones[paciente.id].numero}
+                      li Hab: #{camaAsignaciones[paciente.id].habitacion}
+                      li Ala: #{camaAsignaciones[paciente.id].ala}
+                      li Tipo: #{camaAsignaciones[paciente.id].tipo}
+                      if paciente.Internacions.find(i => i.estado === 'activa')
+                        li Ingreso: #{paciente.Internacions.find(i => i.estado === 'activa').fechaIngreso.toISOString().split('T')[0]}
+                  else
+                    span.text-muted.small Sin asignar
 
-            td
-              if paciente.Internacions.find(i => i.estado === 'activa')
-                span.text-success Sí
-              else
-                span.text-muted No
+                td.text-center
+                  if paciente.Internacions.find(i => i.estado === 'activa')
+                    span.badge.bg-success Sí
+                  else
+                    span.badge.bg-secondary No
 
-            td
-              - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica': paciente.viaIngreso === 'consulta' ? 'Consulta' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
-              | #{via}
-              if paciente.medicoDerivante
-                br
-                small.text-muted #{paciente.medicoDerivante}
+                td
+                  - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación' : paciente.viaIngreso === 'consulta' ? 'Consulta' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
+                  | #{via}
+                  if paciente.medicoDerivante
+                    br
+                    small.text-muted #{paciente.medicoDerivante}
 
-            td
-              a.btn.btn-sm.btn-outline-secondary(href=`/pacientes/opciones?id=${paciente.id}`) ⚙ Gestionar
-              a.btn.btn-sm.btn-outline-warning.ms-1(href=`/pacientes/editar/${paciente.id}`) ✏️ Editar
-              form(action=`/pacientes/eliminar/${paciente.id}` method="POST" style="display:inline" onsubmit="return confirm('¿Estás seguro de eliminar este paciente?');")
-                button.btn.btn-sm.btn-outline-danger.ms-1(type="submit") 🗑️ Eliminar
+                td
+                  .d-flex.flex-wrap.gap-1
+                    a.btn.btn-sm.btn-outline-secondary(title="Gestionar")(href=`/pacientes/opciones?id=${paciente.id}`) ⚙️
+                    a.btn.btn-sm.btn-outline-warning(title="Editar")(href=`/pacientes/editar/${paciente.id}`) ✏️
+                    form.d-inline(method="POST" action=`/pacientes/eliminar/${paciente.id}` onsubmit="return confirm('¿Seguro que deseas eliminar este paciente?');")
+                      button.btn.btn-sm.btn-outline-danger(type="submit" title="Eliminar") 🗑️
 
-    nav(aria-label="Paginación" class="mt-4")
-      ul.pagination.justify-content-center
-        if currentPage > 1
-          li.page-item
+      nav.mt-4(aria-label="Paginación")
+        ul.pagination.justify-content-center
+          li.page-item(class=(currentPage <= 1 ? 'disabled' : ''))
             a.page-link(href=`/pacientes/listado?page=${currentPage - 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) « Anterior
-        else
-          li.page-item.disabled
-            span.page-link « Anterior
 
-        each page in Array(totalPages).fill().map((_, i) => i + 1)
-          if page === currentPage
-            li.page-item.active
-              span.page-link #{page}
-          else
-            li.page-item
+          each page in Array(totalPages).fill().map((_, i) => i + 1)
+            li.page-item(class=(page === currentPage ? 'active' : ''))
               a.page-link(href=`/pacientes/listado?page=${page}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) #{page}
 
-        if currentPage < totalPages
-          li.page-item
+          li.page-item(class=(currentPage >= totalPages ? 'disabled' : ''))
             a.page-link(href=`/pacientes/listado?page=${currentPage + 1}${query ? '&q=' + query : ''}${filtro ? '&filtro=' + filtro : ''}`) Siguiente »
-        else
-          li.page-item.disabled
-            span.page-link Siguiente »
-  else
-    .alert.alert-warning No se encontraron pacientes con ese criterio de búsqueda.
+
+    else
+      .alert.alert-warning.text-center.mt-4 No se encontraron pacientes con ese criterio de búsqueda.

@@ -25,11 +25,10 @@ html
 
   body
     .wrapper
-      // NAVBAR PRINCIPAL
       nav.navbar.navbar-expand-lg.navbar-dark.bg-primary.shadow-sm
         .container
           a.navbar-brand(href="/")
-            img(src="https://i.ibb.co/Q7Sk8DpH/HISarg-LOGO1-color.png", alt="Logo HIS", width="50", height="50", class="me-2")
+            img(src="/img/HISarg_LOGO1_color.png", alt="Logo HIS", width="50", height="50", class="me-2")
             span.fw-bold Sistema HIS
           button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
             span.navbar-toggler-icon
@@ -44,11 +43,9 @@ html
               li.nav-item
                 a.nav-link(href="/internacion/camas") Estado de Camas
 
-      // CONTENIDO PRINCIPAL
       main.container.mt-4
         block content
 
-      // FOOTER
       footer.bg-white.border-top.mt-auto.py-3
         .container.text-center
           span.text-muted Sistema de Internación HIS — Proyecto Integrador 2025

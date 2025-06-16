@@ -10,7 +10,7 @@ router.post('/cancelar/:pacienteId', internacionController.cancelarAdmision);
 router.post('/alta/:pacienteId', internacionController.darDeAlta);
 router.get('/higienizar/:id', internacionController.higienizarCama);
 router.get('/camas', internacionController.mostrarEstadoCamas);
-router.get('/finalizar-turno/:camaId', internacionController.finalizarAsignacion);
+router.get('/finalizar/:camaId', internacionController.finalizarAsignacion);
 router.get('/activar', emergenciaController.registroEmergencia);
 router.post('/finalizar/:camaId', internacionController.finalizarAsignacion);
 

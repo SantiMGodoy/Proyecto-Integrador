@@ -1,79 +1,75 @@
 extends layout
 
 block content
-  if paciente
-    .alert.alert-info.text-center
-      h3 Asignar cama a: #{paciente.nombre}
-      p DNI: #{paciente.dni}
-      p Sexo: #{paciente.sexo}
+  .container
+    if paciente
+      .alert.alert-info.text-center
+        h4.mb-1 Asignar cama a: #{paciente.nombre}
+        p.small.mb-0 DNI: #{paciente.dni} | Sexo: #{paciente.sexo}
 
-  if mensaje
-    .alert.alert-success.text-center #{mensaje}
+    h2.text-center.mb-4.text-primary.fw-bold Estado de camas hospitalarias
 
-  h2.text-center.mb-4 Estado general de camas del hospital
+    if mensaje
+      .alert.alert-success.text-center #{mensaje}
 
-  each ala in [...new Set(camas.map(c => c.Habitacion.Ala.nombre))]
-    - const habitaciones = camas.filter(c => c.Habitacion.Ala.nombre === ala)
-    h3.mt-4.text-primary #{ala}
+    each ala in [...new Set(camas.map(c => c.Habitacion.Ala.nombre))]
+      - const habitaciones = camas.filter(c => c.Habitacion.Ala.nombre === ala)
+      h3.text-primary.border-bottom.pb-2.mt-5 #{ala}
 
-    each habitacionNum in [...new Set(habitaciones.map(c => c.Habitacion.numero))]
-      - const camasHabitacion = habitaciones.filter(c => c.Habitacion.numero === habitacionNum)
-      h5.mt-3.text-secondary Habitación #{habitacionNum} - #{camasHabitacion[0].Habitacion.tipo || 'No especificado'}
+      each habitacionNum in [...new Set(habitaciones.map(c => c.Habitacion.numero))]
+        - const camasHabitacion = habitaciones.filter(c => c.Habitacion.numero === habitacionNum)
+        h5.text-secondary.mt-4.fw-semibold Habitación #{habitacionNum} - #{camasHabitacion[0].Habitacion.tipo || 'Sin especificar'}
 
-      table.table.table-bordered.table-sm
-        thead
-          tr
-            th N° Cama
-            th Estado
-            th Higienizada
-            th Ocupante
-            th Sexo Ocupante
-            th Tipo Habitación
-            th Acción
-        tbody
-          each cama in camasHabitacion
-            - const ocupante = camaOcupacion[cama.id]
-            - const esOcupada = cama.estado === 'ocupada'
-            - const esHigienizada = cama.higienizada
-            - const claseFila = esOcupada ? 'table-danger' : (esHigienizada ? 'table-success' : 'table-warning')
-            tr(class=claseFila)
-              td #{cama.numero}
-              td
-                if esOcupada
-                  span.text-danger Ocupada
-                else
-                  span.text-success Libre
-              td
-                if esHigienizada
-                  span.text-success ✅
-                else
-                  span.text-danger ❌
-              td
-                if esOcupada && ocupante
-                  = ocupante.nombre
-                else
-                  i.text-muted No asignado
-              td #{cama.sexoOcupante || '-'}
-              td #{cama.Habitacion.tipo || 'No especificado'}
-              td
-                if paciente
-                  if cama.estado === 'libre' && cama.higienizada
-                    form(method="POST", action=`/internacion/asignar/${paciente.id}`)
-                      input(type="hidden", name="camaId", value=cama.id)
-                      button.btn.btn-sm.btn-outline-primary(type="submit") Asignar
-                  else
-                    span.text-muted No disponible
-                else
-                  if !esHigienizada && cama.estado === 'libre'
-                    a.btn.btn-sm.btn-outline-success(href=`/internacion/higienizar/${cama.id}`) Higienizar
-                  else if esOcupada && !cama.Habitacion.requiereInternacion
-                    a.btn.btn-sm.btn-outline-warning(href=`/internacion/finalizar-asignacion/${cama.id}`) Finalizar
-                  else if esOcupada && cama.Habitacion.requiereInternacion && ocupante
-                    form.d-inline(method="POST", action=`/internacion/cancelar/${ocupante.id}`)
-                      button.btn.btn-sm.btn-outline-danger(type="submit") Cancelar Admisión
-                    form.d-inline.ms-2(method="POST", action=`/internacion/alta/${ocupante.id}`)
-                      button.btn.btn-sm.btn-outline-success(type="submit") Dar de Alta
-                  else
-                    span.text-muted -
-  
-  a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio
+        .table-responsive
+          table.table.table-bordered.table-sm.shadow-sm
+            thead.table-light
+              tr.text-center
+                th N° Cama
+                th Estado
+                th Higienizada
+                th Ocupante
+                th Sexo
+                th Tipo
+                th Acción
+            tbody
+              each cama in camasHabitacion
+                - const ocupante = camaOcupacion[cama.id]
+                - const claseFila = cama.estado === 'ocupada' ? 'table-danger' : cama.higienizada ? 'table-success' : 'table-warning'
+                tr(class=claseFila)
+                  td.text-center #{cama.numero}
+                  td.text-center
+                    span.badge(class=cama.estado === 'ocupada' ? 'bg-danger' : 'bg-success') #{cama.estado}
+                  td.text-center
+                    if cama.higienizada
+                      i.text-success.fw-bold ✅
+                    else
+                      i.text-danger.fw-bold ❌
+                  td
+                    if cama.estado === 'ocupada' && ocupante
+                      | #{ocupante.nombre}
+                    else
+                      span.text-muted No asignado
+                  td.text-center #{cama.sexoOcupante || '-'}
+                  td.text-center #{cama.Habitacion.tipo || '-'}
+                  td
+                    if paciente
+                      if cama.estado === 'libre' && cama.higienizada
+                        form(method="POST", action=`/internacion/asignar/${paciente.id}`)
+                          input(type="hidden" name="camaId" value=cama.id)
+                          button.btn.btn-sm.btn-outline-primary(type="submit") Asignar
+                      else
+                        span.text-muted No disponible
+                    else
+                      if cama.estado === 'libre' && !cama.higienizada
+                        a.btn.btn-sm.btn-outline-success(href=`/internacion/higienizar/${cama.id}`) Higienizar
+                      else if cama.estado === 'ocupada' && !cama.Habitacion.requiereInternacion
+                        a.btn.btn-sm.btn-outline-warning(href=`/internacion/finalizar/${cama.id}`) Finalizar
+                      else if cama.estado === 'ocupada' && cama.Habitacion.requiereInternacion && ocupante
+                        form.d-inline(method="POST", action=`/internacion/cancelar/${ocupante.id}`)
+                          button.btn.btn-sm.btn-outline-danger(type="submit") Cancelar
+                        form.d-inline.ms-2(method="POST", action=`/internacion/alta/${ocupante.id}`)
+                          button.btn.btn-sm.btn-outline-success(type="submit") Alta
+                      else
+                        span.text-muted -
+
+    a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio
