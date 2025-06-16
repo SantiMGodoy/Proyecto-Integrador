@@ -40,15 +40,62 @@ const registrarPaciente = async (req, res) => {
 
 const panelPaciente = async (req, res) => {
   const id = req.query.id;
+
   try {
-    const paciente = await Paciente.findByPk(id);
-    if (!paciente) return res.status(404).send('Paciente no encontrado');
-    res.render('panel_paciente', { paciente });
+    const paciente = await Paciente.findByPk(id, {
+      include: [
+        {
+          model: Internacion,
+          where: { estado: 'activa' },
+          required: false,
+          include: {
+            model: Cama,
+            include: {
+              model: Habitacion,
+              include: Ala
+            }
+          }
+        },
+        {
+          model: Cama,
+          required: false,
+          include: {
+            model: Habitacion,
+            include: Ala
+          }
+        }
+      ]
+    });
+
+    if (!paciente) {
+      return res.render('mensaje', {
+        tipo: 'error',
+        mensaje: 'Paciente no encontrado.'
+      });
+    }
+
+    const internacion = paciente.Internacions?.[0] || null;
+    const cama = internacion?.Cama || paciente.Cama || null;
+
+    const evaluacionEnfermeria = await require('../models').EvaluacionEnfermeria?.findOne({ where: { PacienteId: id } });
+    const evaluacionMedica = await require('../models').EvaluacionMedica?.findOne({ where: { PacienteId: id } });
+
+    res.render('panel_paciente', {
+      paciente,
+      internacion,
+      cama,
+      evaluacionEnfermeria,
+      evaluacionMedica
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al cargar opciones del paciente');
+    res.render('mensaje', {
+      tipo: 'error',
+      mensaje: 'Error al cargar opciones del paciente.'
+    });
   }
 };
+
 
 const listarPacientes = async (req, res) => {
   const { q, filtro } = req.query;

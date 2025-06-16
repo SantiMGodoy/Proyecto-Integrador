@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
 
     static associate(models) {
       Paciente.hasMany(models.Internacion, { foreignKey: 'PacienteId' });
+      Paciente.hasOne(models.Cama, { foreignKey: 'PacienteId' });
     }
   }
   Paciente.init({

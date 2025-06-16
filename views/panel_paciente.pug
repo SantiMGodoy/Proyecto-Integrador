@@ -1,44 +1,129 @@
 extends layout
 
 block content
-  h2.text-center.mb-4 Opciones para el paciente: #{paciente.nombre}
+  h2.text-center.mb-5.text-primary Resumen y gestión del paciente: #{paciente.nombre}
 
+  .card.shadow-sm.mb-4
+    .card-body
+      h4.border-bottom.pb-2.mb-3 Datos Personales
+      ul.list-group.list-group-flush
+        li.list-group-item.fw-semibold DNI: 
+          span.fw-normal #{paciente.dni}
+        li.list-group-item.fw-semibold Fecha de Nacimiento: 
+          span.fw-normal #{paciente.fechaNacimiento ? paciente.fechaNacimiento.toISOString().split('T')[0] : '-'}
+        li.list-group-item.fw-semibold Sexo: 
+          span.fw-normal #{paciente.sexo}
+        li.list-group-item.fw-semibold Teléfono: 
+          span.fw-normal #{paciente.telefono}
+        li.list-group-item.fw-semibold Dirección: 
+          span.fw-normal #{paciente.direccion}
+        li.list-group-item.fw-semibold Obra Social: 
+          span.fw-normal #{paciente.obraSocial}
+        - const via = paciente.viaIngreso === 'programada' ? 'Cita programada' : paciente.viaIngreso === 'derivacion' ? 'Derivación médica' : paciente.viaIngreso === 'emergencia' ? 'Emergencia' : 'No especificada';
+        li.list-group-item.fw-semibold Vía de ingreso: 
+          span.fw-normal #{via}
+        if paciente.medicoDerivante
+          li.list-group-item.fw-semibold Médico derivante: 
+            span.fw-normal #{paciente.medicoDerivante}
+
+  if paciente.viaIngreso === 'emergencia'
+    .alert.alert-warning.mt-2
+      strong ⚠ Atención:
+      |  El paciente ingresó por emergencia. Solo se registraron los datos básicos y su internación.
+
+  .card.shadow-sm.mb-4
+    .card-body
+      h4.border-bottom.pb-2.mb-3 Evaluaciones
+
+      if evaluacionEnfermeria
+        h5.text-success.mt-3 👩‍⚕️ Enfermería
+        ul.list-group.list-group-flush.mb-3
+          li.list-group-item Enfermedades Previas: #{evaluacionEnfermeria.enfermedadesPrevias}
+          li.list-group-item Cirugías: #{evaluacionEnfermeria.cirugias}
+          li.list-group-item Alergias: #{evaluacionEnfermeria.alergias}
+          li.list-group-item Medicación Actual: #{evaluacionEnfermeria.medicacionActual}
+          li.list-group-item Motivo de Internación: #{evaluacionEnfermeria.motivoInternacion}
+          li.list-group-item Síntomas: #{evaluacionEnfermeria.sintomas}
+          li.list-group-item Presión: #{evaluacionEnfermeria.presion}
+          li.list-group-item Frecuencia Cardíaca: #{evaluacionEnfermeria.frecuenciaCardiaca}
+          li.list-group-item Frecuencia Respiratoria: #{evaluacionEnfermeria.frecuenciaRespiratoria}
+          li.list-group-item Temperatura: #{evaluacionEnfermeria.temperatura}
+          li.list-group-item Plan de Cuidados: #{evaluacionEnfermeria.planCuidados}
+      else
+        p.text-muted No se encontró evaluación de enfermería.
+
+      if evaluacionMedica
+        h5.text-primary.mt-4 👨‍⚕️ Médica
+        ul.list-group.list-group-flush
+          li.list-group-item Diagnóstico: #{evaluacionMedica.diagnostico}
+          li.list-group-item Tratamientos: #{evaluacionMedica.tratamientos}
+          li.list-group-item Medicación: #{evaluacionMedica.medicacion}
+          li.list-group-item Estudios solicitados: #{evaluacionMedica.estudiosSolicitados}
+          li.list-group-item Observaciones: #{evaluacionMedica.observaciones}
+      else
+        p.text-muted No se encontró evaluación médica.
+
+  .card.shadow-sm.mb-4
+    .card-body
+      h4.border-bottom.pb-2.mb-3 Estado de Cama
+      if cama
+        ul.list-group.list-group-flush
+          li.list-group-item Cama: #{cama.numero}
+          li.list-group-item Habitación: #{cama.Habitacion.numero}
+          li.list-group-item Ala: #{cama.Habitacion.Ala.nombre}
+          li.list-group-item Tipo: #{cama.Habitacion.tipo}
+          li.list-group-item ¿Internación?: #{cama.Habitacion.requiereInternacion ? 'Sí' : 'No'}
+      else
+        p.text-muted No tiene cama asignada actualmente.
+
+      if internacion
+        if internacion.fechaAlta
+          p.mt-2.text-success Fue dado de alta el #{internacion.fechaAlta.toISOString().split('T')[0]}
+        else
+          form.d-inline(action=`/internacion/alta/${paciente.id}` method="POST" onsubmit="return confirm('¿Confirmar alta del paciente?');")
+            button.btn.btn-success.mt-2(type="submit") ✅ Dar de alta
+
+          form.d-inline(action=`/internacion/cancelar/${paciente.id}` method="POST" onsubmit="return confirm('¿Cancelar internación?');")
+            button.btn.btn-outline-danger.mt-2.ms-2(type="submit") ❌ Cancelar internación
+      else if cama && !cama.Habitacion.requiereInternacion
+        form.d-inline(action=`/internacion/finalizar/${cama.id}` method="POST" onsubmit="return confirm('¿Finalizar turno y liberar cama?');")
+          button.btn.btn-success.mt-2(type="submit") ✅ Finalizar turno
+
+        form.d-inline(action=`/internacion/finalizar/${cama.id}` method="POST" onsubmit="return confirm('¿Cancelar turno y liberar cama?');")
+          button.btn.btn-outline-danger.mt-2.ms-2(type="submit") ❌ Cancelar turno
+
+  hr
+
+  h4.mt-4.mb-3 Opciones Rápidas
   .row.text-center
-    .col-md-4
+    .col-md-4.mb-3
       .card.shadow-sm
         .card-body
           h5.card-title 🛏️ Asignar cama
-          a.btn.btn-primary(href=`/internacion/asignar/${paciente.id}`) Ir
+          a.btn.btn-primary.mt-2(href=`/internacion/asignar/${paciente.id}`) Ir
 
-    .col-md-4
+    .col-md-4.mb-3
       .card.shadow-sm
         .card-body
           h5.card-title 👩‍⚕️ Evaluación de enfermería
           if paciente.viaIngreso === 'emergencia'
             p.text-muted (opcional)
-          a.btn.btn-success(href=`/enfermeria/registrar/${paciente.id}`) Ir
+          a.btn.btn-success.mt-2(href=`/enfermeria/registrar/${paciente.id}`) Ir
 
-    .col-md-4
+    .col-md-4.mb-3
       .card.shadow-sm
         .card-body
           h5.card-title 👨‍⚕️ Evaluación médica
           if paciente.viaIngreso === 'emergencia'
             p.text-muted (opcional)
-          a.btn.btn-info(href=`/medica/registrar/${paciente.id}`) Ir
+          a.btn.btn-info.mt-2(href=`/medica/registrar/${paciente.id}`) Ir
 
   .row.text-center.mt-4
     .col-md-6.offset-md-3
       .card.shadow-sm
         .card-body
-          h5.card-title 📋 Ver resumen del paciente
-          a.btn.btn-outline-secondary(href=`/resumen/${paciente.id}`) Ver resumen
-
-  .row.text-center.mt-4
-    .col-md-6.offset-md-3
-      .card.shadow-sm
-        .card-body
-          h5.card-title 🛏️ Estado de camas
+          h5.card-title 🛏️ Ver estado de camas
           p.text-muted Ver disponibilidad general del hospital
-          a.btn.btn-outline-info(href="/internacion/camas") Ver camas
+          a.btn.btn-outline-info.mt-2(href="/internacion/camas") Ver camas
 
-  a.btn.btn-outline-secondary.mt-4(href="/") ⬅️ Volver al inicio
+  a.btn.btn-outline-secondary.mt-5(href="/") ⬅️ Volver al inicio
