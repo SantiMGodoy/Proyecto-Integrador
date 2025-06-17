@@ -5,6 +5,7 @@ const sequelize = require('./db');
 const { Ala, Cama, EvaluacionEnfermeria, EvaluacionMedica, Habitacion, Internacion, Paciente } = require('./models');
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 // Configuración de vistas y middlewares
@@ -13,7 +14,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta base de prueba (opcional pero útil)
 app.get('/ping', (req, res) => {
   res.send('¡Servidor funcionando correctamente en Railway! 🚀');
 });
@@ -29,6 +29,7 @@ app.get('/', async (req, res) => {
   }
 });
 
+// Redirección para resumen
 app.get('/resumen', (req, res) => {
   const id = req.query.id;
   res.redirect(`/resumen/${id}`);
@@ -49,7 +50,7 @@ app.use('/resumen', resumenRoutes);
 // Middleware de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Algo salió mal!');
+  res.status(500).send('¡Algo salió mal!');
 });
 
 // Conexión y sincronización de Sequelize
