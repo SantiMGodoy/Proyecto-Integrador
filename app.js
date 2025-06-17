@@ -72,7 +72,7 @@ app.use((err, req, res, next) => {
 sequelize.sync({ alter: true })
   .then(() => {
     console.log('📡 Base de datos sincronizada');
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
     });
   })
