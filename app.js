@@ -13,7 +13,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas principales
+// Ruta base de prueba (opcional pero útil)
+app.get('/ping', (req, res) => {
+  res.send('¡Servidor funcionando correctamente en Railway! 🚀');
+});
+
+// Ruta de inicio
 app.get('/', async (req, res) => {
   try {
     const totalInternados = await Internacion.count({ where: { estado: 'activa' } });
@@ -29,6 +34,7 @@ app.get('/resumen', (req, res) => {
   res.redirect(`/resumen/${id}`);
 });
 
+// Rutas principales
 const pacientesRoutes = require('./routes/pacientes');
 app.use('/pacientes', pacientesRoutes);
 const internacionRoutes = require('./routes/internacion');
@@ -40,16 +46,18 @@ app.use('/medica', medicaRoutes);
 const resumenRoutes = require('./routes/resumen');
 app.use('/resumen', resumenRoutes);
 
+// Middleware de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Algo salió mal!');
 });
 
+// Conexión y sincronización de Sequelize
 sequelize.sync({ alter: true })
   .then(() => {
     console.log('Base de datos sincronizada');
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+      console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
   })
   .catch(err => {
