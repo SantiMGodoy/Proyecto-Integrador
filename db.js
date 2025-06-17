@@ -1,15 +1,15 @@
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const dbName = process.env.DB_NAME || "sistema_hospitalario";
-const dbUser = process.env.DB_USER || "root";
-const dbPassword = process.env.DB_PASSWORD || "";
-const dbHost = process.env.DB_HOST || "mysql.railway.internal"; // Host para Railway
-const dbPort = process.env.DB_PORT || 3306;
+const DB_NAME = process.env.DB_NAME || "integrador";
+const DB_USER = process.env.DB_USER || "root";
+const DB_PASSWORD = process.env.DB_PASSWORD || "root";
+const DB_HOST = process.env.DB_HOST || "mysql.railway.internal";
+const DB_PORT = process.env.DB_PORT || 3306;
 
-const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
-  host: dbHost,
-  port: dbPort,
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  port: DB_PORT,
   dialect: "mysql",
   logging: false,
 });
