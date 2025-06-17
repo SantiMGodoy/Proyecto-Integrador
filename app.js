@@ -13,7 +13,7 @@ console.log("🔗 Módulo Sequelize cargado correctamente");
 const { Ala, Cama, EvaluacionEnfermeria, EvaluacionMedica, Habitacion, Internacion, Paciente } = require('./models');
 console.log("📦 Modelos importados correctamente");
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 console.log(`🌐 Puerto definido: ${PORT}`);
 
 // Configuración de vistas y middlewares
