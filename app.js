@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 require('dotenv').config();
-const { Internacion } = require('./models');
+const db = require('./models'); // Importa el index.js de models/
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,13 +16,13 @@ app.use(express.urlencoded({ extended: true }));
 // Rutas principales
 app.get('/', async (req, res) => {
   try {
-    const totalInternados = await Internacion.count({ where: { estado: 'activa' } });
+    const totalInternados = await db.Internacion.count({ where: { estado: 'activa' } });
     res.render('index', {
       titulo: 'Sistema de Admisión HIS',
       totalInternados
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error en la ruta /:', error);
     res.status(500).send('Error al cargar inicio');
   }
 });
@@ -32,7 +32,6 @@ app.get('/resumen', (req, res) => {
   res.redirect(`/resumen/${id}`);
 });
 
-// Rutas del sistema
 const pacientesRoutes = require('./routes/pacientes');
 app.use('/pacientes', pacientesRoutes);
 
@@ -48,7 +47,20 @@ app.use('/medica', medicaRoutes);
 const resumenRoutes = require('./routes/resumen');
 app.use('/resumen', resumenRoutes);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Algo salió mal!');
 });
+
+// Iniciar servidor tras sincronizar la base de datos
+db.sequelize.sync({ alter: true }) // Ajusta el esquema sin eliminar datos
+  .then(() => {
+    console.log('Base de datos sincronizada');
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Error al sincronizar la base de datos:', err);
+  });
